@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autentika - Beauty & Care</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Lato', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            olive: '#556B2F',  // Tono aproximado de tu logo (Verde Oliva)
+                            light: '#8FBC8F',  // Verde más suave
+                            cream: '#F9F7F2',  // Fondo crema muy suave
+                            sand: '#E6E2D3',   // Tono arena para bordes
+                            dark: '#2C3325',   // Texto oscuro (no negro puro, sino verde muy oscuro)
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'float': 'float 8s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F9F7F2; color: #2C3325; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        
+        /* Gradiente sutil para textos destacados */
+        .text-gradient-nature {
+            background: linear-gradient(to right, #2C3325, #556B2F);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Botones elegantes */
+        .btn-primary {
+            background-color: #556B2F;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #3E4F22;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(85, 107, 47, 0.5);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-olive selection:text-white">
+
+<header class="sticky top-0 z-40 bg-brand-cream/90 backdrop-blur-md border-b border-brand-sand transition-all duration-300" id="main-header">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="#" class="flex items-center gap-3 group">
+            <div class="w-12 h-12 overflow-hidden rounded-full border border-brand-sand shadow-sm group-hover:shadow-md transition-all duration-500">
+                <img id="brand-logo" src="https://via.placeholder.com/100?text=A" alt="Logo" class="w-full h-full object-cover">
+            </div>
+            <div class="flex flex-col">
+                <span id="brand-name" class="text-2xl font-serif font-bold leading-none tracking-tight text-brand-dark">
+                    Autentika
+                </span>
+                <span class="text-[10px] font-bold tracking-[0.2em] text-brand-olive uppercase opacity-80">By Manuela Marmolejo</span>
+            </div>
+        </a>
+
+        <nav class="hidden md:flex gap-10 font-medium text-sm tracking-wide text-gray-600">
+            <a href="#" class="hover:text-brand-olive transition-colors relative group py-2">
+                Inicio
+                <span class="absolute bottom-0 left-0 w-0 h-px bg-brand-olive transition-all duration-300 group-hover:w-full"></span>
+            </a>
+            <a href="#catalogo" class="hover:text-brand-olive transition-colors relative group py-2">
+                Colección
+                <span class="absolute bottom-0 left-0 w-0 h-px bg-brand-olive transition-all duration-300 group-hover:w-full"></span>
+            </a>
+            <a href="#" onclick="toggleContactModal()" class="hover:text-brand-olive transition-colors relative group py-2">
+                Nuestra Historia
+                <span class="absolute bottom-0 left-0 w-0 h-px bg-brand-olive transition-all duration-300 group-hover:w-full"></span>
+            </a>
+        </nav>
+
+        <div class="flex items-center gap-6">
+            <div class="relative cursor-pointer group" id="cart-btn">
+                <div class="p-2 rounded-full hover:bg-brand-sand/50 transition-colors">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 text-brand-dark group-hover:text-brand-olive transition-colors"></i>
+                </div>
+                <span id="cart-counter" class="hidden absolute top-0 right-0 bg-brand-olive text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">0</span>
+            </div>
+            <button class="md:hidden text-brand-dark" id="menu-btn">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div id="mobile-menu" class="hidden md:hidden bg-brand-cream border-t border-brand-sand p-4 flex-col gap-2 shadow-lg absolute w-full left-0 top-full">
+        <a href="#" class="block py-3 px-4 rounded-lg hover:bg-brand-sand/30 text-brand-dark font-medium">Inicio</a>
+        <a href="#catalogo" class="block py-3 px-4 rounded-lg hover:bg-brand-sand/30 text-brand-dark font-medium">Ver Colección</a>
+        <button onclick="toggleContactModal()" class="block w-full text-left py-3 px-4 rounded-lg hover:bg-brand-sand/30 text-brand-dark font-medium">
+            Contacto
+        </button>
+    </div>
+</header>
+
+<section class="relative min-h-[90vh] flex items-center overflow-hidden bg-[#F9F7F2]">
+    
+    <div class="absolute top-1/2 left-0 -translate-y-1/2 w-full overflow-hidden pointer-events-none select-none z-0">
+        <span class="text-[20vw] font-serif font-bold text-brand-dark opacity-[0.03] leading-none whitespace-nowrap ml-[-5vw]">
+            Natural Beauty
+        </span>
+    </div>
+
+    <div class="container mx-auto px-6 relative z-10">
+        <div class="flex flex-col md:flex-row items-center justify-between">
+            
+            <div class="w-full md:w-3/5 space-y-6 animate-fade-in relative z-30 md:-mr-32 pt-10 md:pt-0">
+                
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-olive/20 bg-white/90 backdrop-blur-sm text-brand-olive text-xs font-bold uppercase tracking-widest shadow-sm w-fit">
+                    <span class="w-2 h-2 rounded-full bg-brand-olive animate-pulse"></span>
+                    Nueva Colección 2025
+                </div>
+                
+                <h1 class="text-6xl md:text-9xl font-serif font-medium leading-[0.85] text-brand-dark tracking-tighter">
+                    Natural <br/>
+                    <span class="italic text-brand-olive relative inline-block">
+                        Glow
+                        <svg class="absolute w-full h-3 -bottom-1 left-0 text-brand-olive/40" viewBox="0 0 100 10" preserveAspectRatio="none">
+                            <path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="2" fill="none" />
+                        </svg>
+                    </span> Ritual.
+                </h1>
+                
+                <p class="text-gray-600 text-lg md:text-xl max-w-md leading-relaxed font-light backdrop-blur-sm">
+                    Redescubre tu brillo con ingredientes 100% orgánicos. Lujo consciente diseñado para nutrir tu cabello y piel desde la raíz.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 pt-8">
+                    <a href="#catalogo" class="btn-primary py-4 px-10 rounded-full shadow-2xl flex items-center justify-center gap-3 text-sm font-bold tracking-widest uppercase hover:scale-105 transition-transform bg-brand-olive text-white z-40">
+                        Ver Productos
+                    </a>
+                    <button onclick="openVideoModal()" class="px-8 py-4 rounded-full border-2 border-brand-dark/10 hover:border-brand-dark hover:bg-brand-dark hover:text-white transition-all font-bold text-brand-dark text-sm tracking-widest uppercase flex items-center gap-2 bg-white/50 backdrop-blur z-40">
+                        <i data-lucide="play-circle" class="w-5 h-5"></i> Video
+                    </button>
+                </div>
+
+                <div class="mt-12 pt-8 border-t border-brand-dark/5 grid grid-cols-3 gap-6 max-w-lg animate-fade-in" style="animation-delay: 0.3s;">
+    
+                    <div class="group cursor-default">
+                        <div class="bg-brand-olive/10 w-10 h-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-brand-olive group-hover:text-white transition-colors duration-300">
+                            <i data-lucide="truck" class="w-5 h-5 text-brand-olive group-hover:text-white transition-colors"></i>
+                        </div>
+                        <h4 class="font-serif font-bold text-brand-dark text-sm leading-tight mb-1">Envíos Rápidos</h4>
+                        <p class="text-[11px] text-gray-500 uppercase tracking-wide font-medium">A todo Colombia</p>
+                    </div>
+                
+                    <div class="group cursor-default">
+                        <div class="bg-brand-olive/10 w-10 h-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-brand-olive group-hover:text-white transition-colors duration-300">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-brand-olive group-hover:text-white transition-colors"></i>
+                        </div>
+                        <h4 class="font-serif font-bold text-brand-dark text-sm leading-tight mb-1">Pago Seguro</h4>
+                        <p class="text-[11px] text-gray-500 uppercase tracking-wide font-medium">Contraentrega / Nequi</p>
+                    </div>
+                
+                    <div class="group cursor-default">
+                        <div class="bg-brand-olive/10 w-10 h-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-brand-olive group-hover:text-white transition-colors duration-300">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-brand-olive group-hover:text-white transition-colors"></i>
+                        </div>
+                        <h4 class="font-serif font-bold text-brand-dark text-sm leading-tight mb-1">100% Original</h4>
+                        <p class="text-[11px] text-gray-500 uppercase tracking-wide font-medium">Garantía Directa</p>
+                    </div>
+                
+                </div>
+
+            </div>
+
+            <div class="w-full md:w-2/5 relative mt-16 md:mt-0 flex justify-end perspective-1000 z-10">
+                
+                <div class="relative w-full max-w-[420px] aspect-[3/4] rounded-t-[200px] bg-white p-2 shadow-2xl transform rotate-[-2deg] hover:rotate-0 transition-transform duration-700">
+                    <div class="w-full h-full rounded-t-[190px] overflow-hidden relative">
+                        <img src="hero.jpg" alt="Aura Model" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-brand-olive/20 to-transparent mix-blend-multiply"></div>
+                    </div>
+                </div>
+
+                <div class="absolute top-1/2 -translate-y-1/2 -left-12 md:-left-20 w-40 h-40 md:w-56 md:h-56 rounded-full border-[6px] border-[#F9F7F2] shadow-[0_20px_40px_rgba(0,0,0,0.2)] overflow-hidden animate-float z-20 bg-white">
+                    <img src="hero.jpg" alt="Detalle" class="w-full h-full object-cover scale-[1.7] hover:scale-[1.8] transition-transform duration-1000">
+                </div>
+
+                <div class="absolute -top-6 -right-6 md:top-10 md:-right-12 bg-white p-5 rounded-full shadow-xl animate-bounce z-30 flex flex-col items-center justify-center w-24 h-24 border border-gray-100" style="animation-duration: 6s;">
+                    <span class="text-[10px] uppercase font-bold text-gray-400">Desde</span>
+                    <span class="text-xl font-serif font-bold text-brand-dark">$45k</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="featured-section" class="hidden relative py-12 bg-white">
+    <div class="container mx-auto px-6">
+        <div class="flex items-center gap-4 mb-8">
+            <h3 class="text-2xl font-serif text-brand-dark italic">Favoritos del Mes</h3>
+            <div class="h-px flex-1 bg-brand-sand"></div>
+        </div>
+
+        <div class="relative rounded-3xl overflow-hidden shadow-xl bg-brand-cream border border-brand-sand">
+            
+            <div id="carousel-track" class="flex transition-transform duration-700 ease-in-out h-full">
+                </div>
+
+            <button onclick="moveCarousel(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-brand-dark p-3 rounded-full shadow-sm backdrop-blur-sm transition-all z-10 hover:scale-110">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </button>
+            <button onclick="moveCarousel(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-brand-dark p-3 rounded-full shadow-sm backdrop-blur-sm transition-all z-10 hover:scale-110">
+                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </button>
+
+            <div id="carousel-dots" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10"></div>
+        </div>
+    </div>
+</section>
+
+<section class="py-24 bg-white relative overflow-hidden" id="catalogo">
+    
+    <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 opacity-[0.03] pointer-events-none select-none">
+       <i data-lucide="flower" class="w-96 h-96 text-brand-dark"></i>
+    </div>
+
+    <div class="container mx-auto px-6 relative z-10">
+        
+        <div class="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
+            <span class="text-xs font-bold tracking-[0.3em] text-brand-olive uppercase mb-4 block">Shop The Look</span>
+            <h2 class="text-4xl md:text-5xl font-serif text-brand-dark mb-6">Nuestra Colección</h2>
+            <div class="flex items-center justify-center gap-2 opacity-50 mb-6">
+                <div class="w-12 h-px bg-brand-olive"></div>
+                <div class="w-2 h-2 rounded-full border border-brand-olive"></div>
+                <div class="w-12 h-px bg-brand-olive"></div>
+            </div>
+            <p class="text-gray-500 font-light text-lg leading-relaxed">
+                Explora tratamientos capilares y esenciales de belleza. <br class="hidden md:block">Fórmulas limpias para resultados reales.
+            </p>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-between items-end gap-8 mb-16 border-b border-gray-100 pb-6">
+            
+            <div class="w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+                <div id="category-filters" class="flex gap-3">
+                    </div>
+            </div>
+
+            <div class="w-full md:w-72 relative group">
+                <input 
+                    type="text" 
+                    id="search-input"
+                    oninput="searchProductsFront(this.value)" 
+                    placeholder="Buscar shampoo, crema..." 
+                    class="w-full py-2 bg-transparent border-b border-gray-300 focus:border-brand-olive outline-none text-brand-dark placeholder-gray-400 transition-all font-serif pr-8"
+                >
+                <i data-lucide="search" class="absolute right-0 top-2 w-5 h-5 text-gray-400 group-hover:text-brand-olive transition-colors"></i>
+            </div>
+        </div>
+
+        <div id="loader" class="flex flex-col justify-center items-center py-20">
+            <div class="animate-spin text-brand-olive mb-4">
+                <i data-lucide="loader-2" class="w-10 h-10"></i>
+            </div>
+            <p class="text-gray-400 text-xs font-bold tracking-widest uppercase">Cargando productos...</p>
+        </div>
+
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16 fade-in min-h-[400px]"></div>
+        
+        <div id="load-more-container" class="hidden text-center mt-20">
+             <button onclick="loadMoreProducts()" class="inline-flex items-center gap-3 px-8 py-3 border border-gray-200 rounded-full hover:border-brand-olive hover:text-brand-olive transition-all font-bold text-xs tracking-widest uppercase text-gray-500">
+                Descubrir más <i data-lucide="arrow-down" class="w-4 h-4"></i>
+            </button>
+            <p class="text-[10px] text-gray-300 mt-4 uppercase tracking-wider">
+                Mostrando <span id="showing-count">0</span> de <span id="total-count">0</span>
+            </p>
+        </div>
+
+        <div id="empty-state" class="hidden text-center py-24 bg-brand-cream/20 rounded-3xl mt-8">
+            <div class="inline-block p-4 rounded-full bg-white shadow-sm mb-4">
+                <i data-lucide="search-x" class="w-6 h-6 text-brand-olive"></i>
+            </div>
+            <h4 class="text-xl font-serif text-gray-900">Sin resultados</h4>
+            <p class="text-gray-500 font-light mt-2 text-sm">Intenta buscar con otro término.</p>
+        </div>
+
+    </div>
+</section>
+
+<div id="cart-sidebar" class="fixed inset-0 z-50 hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 bg-brand-dark/30 backdrop-blur-sm transition-opacity" onclick="toggleCart()"></div>
+    
+    <div class="fixed inset-y-0 right-0 flex max-w-full pl-10 pointer-events-none">
+        <div id="cart-panel" class="pointer-events-auto w-screen max-w-md transform transition ease-in-out duration-500 translate-x-full flex h-full flex-col bg-white shadow-2xl">
+            
+            <div class="flex items-center justify-between px-6 py-6 border-b border-gray-100 bg-brand-cream/20">
+                <div>
+                    <h2 class="text-xl font-serif text-brand-dark" id="cart-title">Tu Bolsa</h2>
+                    <button id="back-to-cart-btn" class="hidden text-xs text-gray-500 hover:text-brand-olive flex items-center gap-1 uppercase tracking-wide font-bold mt-1">
+                        <i data-lucide="arrow-left" class="w-3 h-3"></i> Volver a productos
+                    </button>
+                </div>
+                <button type="button" class="text-gray-400 hover:text-brand-olive transition-colors" onclick="toggleCart()">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div id="cart-view-list" class="flex-1 flex flex-col h-full">
+                
+                <div class="flex-1 overflow-y-auto px-6 py-4">
+                    <ul id="cart-items-container" class="space-y-6"></ul>
+                    
+                    <div id="cart-empty-state" class="hidden flex flex-col items-center justify-center h-64 text-center">
+                        <div class="bg-brand-cream p-6 rounded-full mb-4">
+                            <i data-lucide="shopping-bag" class="w-8 h-8 text-brand-olive/50"></i>
+                        </div>
+                        <p class="text-gray-500 font-light">Tu bolsa está vacía.</p>
+                        <button onclick="toggleCart()" class="mt-4 text-brand-olive font-bold text-sm hover:underline">Ir a la colección</button>
+                    </div>
+                </div>
+
+                <div id="cart-footer" class="border-t border-gray-100 px-6 py-6 bg-brand-cream/30">
+                    <div class="flex justify-between text-lg font-serif font-bold text-brand-dark mb-4">
+                        <p>Subtotal</p>
+                        <p id="cart-total">$0</p>
+                    </div>
+                    <button onclick="showCheckoutForm()" id="btn-checkout-init" class="w-full btn-primary py-4 rounded-xl shadow-lg font-bold flex justify-center items-center gap-2">
+                        Completar Compra <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="cart-view-checkout" class="hidden flex-1 overflow-y-auto px-6 py-4 bg-white">
+                
+                <form id="checkout-form" class="space-y-5 pb-6">
+                    <div class="space-y-4">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b pb-2">Tus Datos</h4>
+                        
+                        <input type="text" id="cust-name" required placeholder="Nombre Completo *" class="w-full p-3 bg-brand-cream border-none rounded-lg text-sm focus:ring-1 focus:ring-brand-olive placeholder-gray-400">
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="number" id="cust-cedula" required placeholder="Cédula / NIT *" class="w-full p-3 bg-brand-cream border-none rounded-lg text-sm focus:ring-1 focus:ring-brand-olive">
+                            <input type="tel" id="cust-phone" required placeholder="Celular / WhatsApp *" class="w-full p-3 bg-brand-cream border-none rounded-lg text-sm focus:ring-1 focus:ring-brand-olive">
+                        </div>
+                        
+                        <input type="email" id="cust-email" placeholder="Correo Electrónico (Opcional)" class="w-full p-3 bg-brand-cream border-none rounded-lg text-sm focus:ring-1 focus:ring-brand-olive">
+                    </div>
+
+                    <div class="space-y-4 pt-2">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b pb-2">Dirección de Entrega</h4>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="text" id="cust-dept" required placeholder="Departamento *" class="w-full p-3 bg-brand-cream border-none rounded-lg text-sm focus:ring-1 focus:ring-brand-olive">
+                            <input type="text" id="cust-city" required placeholder="Ciudad *" class="w-full p-3 bg-brand-cream border-none rounded-lg text-sm focus:ring-1 focus:ring-brand-olive">
+                        </div>
+                        
+                        <input type="text" id="cust-address" required placeholder="Dirección Exacta (Calle, Cra, #) *" class="w-full p-3 bg-brand-cream border-none rounded-lg text-sm focus:ring-1 focus:ring-brand-olive">
+                        <input type="text" id="cust-barrio" placeholder="Barrio / Unidad / Edificio" class="w-full p-3 bg-brand-cream border-none rounded-lg text-sm focus:ring-1 focus:ring-brand-olive">
+                    </div>
+
+                    <div class="pt-4">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b pb-2 mb-3">Método de Pago</h4>
+                        <select id="cust-method" class="w-full p-3 bg-white border border-gray-200 rounded-lg text-sm focus:border-brand-olive" onchange="updatePaymentInfo(this.value)">
+                            <option value="Contraentrega">💵 Efectivo (Contraentrega)</option>
+                            <option value="Transferencia">🏦 Bancolombia / Nequi</option>
+                            <option value="MercadoPago">💳 Tarjeta / PSE (Link de Pago)</option>
+                        </select>
+                        
+                        <div id="payment-alert" class="mt-3 p-3 bg-blue-50 text-blue-800 text-xs rounded-lg flex gap-2 border border-blue-100">
+                            <i data-lucide="info" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
+                            <p id="payment-info-text">Pagas en efectivo al recibir tu pedido.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-gray-600 font-bold text-sm">Total a Pagar:</span>
+                            <span id="checkout-total-display" class="text-2xl font-serif font-bold text-brand-dark">$0</span>
+                        </div>
+                        
+                        <button type="submit" class="w-full btn-primary py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 font-bold tracking-wide uppercase text-sm">
+                            Confirmar Pedido <i data-lucide="check" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="product-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-brand-dark/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+    <div class="flex min-h-full items-center justify-center p-4">
+        <div class="relative transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all w-full max-w-4xl grid grid-cols-1 md:grid-cols-2">
+            
+            <button onclick="closeModal()" class="absolute top-4 right-4 z-10 bg-white/50 p-2 rounded-full hover:bg-white transition-colors text-gray-500">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="bg-brand-cream/50 p-8 flex items-center justify-center">
+                <div id="modal-img-container" class="w-full h-64 md:h-80 flex items-center justify-center"></div>
+            </div>
+
+            <div class="p-8 md:p-12 flex flex-col justify-center">
+                <span id="modal-category" class="text-xs font-bold tracking-[0.2em] text-brand-olive uppercase mb-3 block">Categoría</span>
+                <h2 class="text-3xl font-serif text-brand-dark mb-4" id="modal-title">Nombre Producto</h2>
+                <p id="modal-desc" class="text-gray-600 text-sm mb-6 leading-relaxed font-light">Descripción...</p>
+                
+                <div class="flex items-end gap-4 mb-8">
+                    <span class="text-3xl font-light text-brand-dark" id="modal-price">$0</span>
+                    <span id="modal-stock" class="text-xs text-gray-400 mb-2">Stock: 0</span>
+                </div>
+
+                <button id="modal-add-btn" class="w-full btn-primary py-4 rounded-lg flex items-center justify-center gap-2 font-bold tracking-wide uppercase text-sm">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Agregar a la bolsa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-contact" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-contact" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 bg-brand-dark/80 backdrop-blur-sm transition-opacity" onclick="toggleContactModal()"></div>
+    
+    <div class="flex min-h-full items-center justify-center p-4">
+        
+        <div class="relative transform rounded-2xl bg-white shadow-2xl transition-all w-full max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-hide">
+            
+            <button onclick="toggleContactModal()" class="sticky top-4 right-4 float-right z-10 text-gray-400 hover:text-brand-dark bg-white/50 rounded-full p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
+            
+            <div class="p-10 text-center">
+                <div class="w-24 h-24 rounded-full bg-brand-cream border border-brand-olive/20 mx-auto mb-6 flex items-center justify-center overflow-hidden">
+                   <img id="brand-logo-modal" src="" class="w-full h-full object-cover">
+                </div>
+                
+                <h3 class="text-2xl font-serif text-brand-dark mb-4" id="brand-name-modal">Autentika</h3>
+                
+                <p id="brand-history" class="text-gray-600 font-light leading-relaxed mb-8 whitespace-pre-line text-left">
+                    Cargando historia...
+                </p>
+                
+                <div id="brand-showcase" class="grid grid-cols-2 gap-4 mb-8">
+                    </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left bg-brand-cream/30 p-6 rounded-xl border border-brand-sand">
+                    <div class="flex gap-3">
+                        <i data-lucide="phone" class="w-5 h-5 text-brand-olive flex-shrink-0"></i>
+                        <div>
+                            <p class="text-xs font-bold uppercase text-gray-400">Pedidos / WhatsApp</p>
+                            <p class="font-bold text-brand-dark">316 529 4505</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-brand-olive flex-shrink-0"></i>
+                        <div>
+                            <p class="text-xs font-bold uppercase text-gray-400">Ubicación</p>
+                            <p class="font-bold text-brand-dark">Caicedonia, Valle</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="fixed bottom-4 right-4 z-50 opacity-0 hover:opacity-100 transition-opacity">
+    <div class="bg-white p-2 rounded shadow border text-xs">
+        <input type="text" id="tunnel-url" value="http://localhost:3000" class="border p-1">
+    </div>
+</div>
+
+<div id="video-modal" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-md transition-opacity" onclick="closeVideoModal()"></div>
+    
+    <div class="relative z-10 flex items-center justify-center h-full p-4 md:p-10">
+        <button onclick="closeVideoModal()" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
+            <i data-lucide="x" class="w-10 h-10"></i>
+        </button>
+        
+        <div class="w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative">
+            <div id="video-container" class="w-full h-full flex items-center justify-center">
+                <i data-lucide="loader" class="animate-spin text-white w-10 h-10"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="app.js"></script>
+
+</body>
+</html>

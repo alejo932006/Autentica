@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autentika Manager</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="manager.css">
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="brand">
+            Aura<br><span style="font-size: 0.5em; letter-spacing: 3px; font-family: sans-serif; opacity: 0.7;">MANAGER</span>
+        </div>
+        <button class="nav-item active" onclick="switchView('orders', this)">
+            <span class="material-icons-round">receipt_long</span> Pedidos
+        </button>
+        <button class="nav-item" onclick="switchView('inventory', this)">
+            <span class="material-icons-round">spa</span> Catálogo
+        </button>
+        <button class="nav-item" onclick="switchView('featured', this)">
+            <span class="material-icons-round">stars</span> Destacados
+        </button>
+        <button class="nav-item" onclick="switchView('config', this)">
+            <span class="material-icons-round">storefront</span> Mi Tienda
+        </button>
+        <button class="nav-item" onclick="switchView('users', this)">
+            <span class="material-icons-round">group</span> Administradores
+        </button>
+        <button class="nav-item logout" onclick="logout()">
+            <span class="material-icons-round">logout</span> Salir
+        </button>
+    </nav>
+
+    <main class="content">
+        
+        <section id="view-orders">
+            <header class="header" style="flex-wrap: wrap; gap: 15px;">
+                <h1>Gestión de Pedidos</h1>
+                
+                <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 5px 15px; border-radius: 50px; border: 1px solid #E6E2D3;">
+                    <span class="material-icons-round" style="font-size: 18px; color: gray;">date_range</span>
+                    <input type="date" id="filter-date-start" onchange="filterOrdersByDate()" style="border: none; outline: none; font-family: 'Lato'; color: #555;">
+                    <span style="color: #ccc;">—</span>
+                    <input type="date" id="filter-date-end" onchange="filterOrdersByDate()" style="border: none; outline: none; font-family: 'Lato'; color: #555;">
+                    
+                    <button onclick="clearDateFilter()" title="Limpiar Filtro" style="background: none; border: none; cursor: pointer; color: #EF4444; display: flex; align-items: center;">
+                        <span class="material-icons-round" style="font-size: 18px;">close</span>
+                    </button>
+                </div>
+            
+                <button onclick="loadOrders()" style="background: white; border: 1px solid #ddd; border-radius: 50%; padding: 8px; cursor: pointer;">
+                    <span class="material-icons-round" style="color: #556B2F;">refresh</span>
+                </button>
+            </header>
+            
+            <div class="kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-val" id="kpi-pending">0</div>
+                    <div class="kpi-lbl">Pendientes</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-val" id="kpi-total-today">$0</div>
+                    <div class="kpi-lbl">Vendido Hoy</div>
+                </div>
+            </div>
+
+            <div id="orders-list" style="background: white; border-radius: 16px; border: 1px solid #E6E2D3; overflow: hidden;">
+                <p style="padding: 20px; color: gray;">Cargando...</p>
+            </div>
+        </section>
+
+        <section id="view-inventory" style="display: none;">
+            <header class="header">
+                <h1>Catálogo & Stock</h1>
+                <div class="search-box">
+                    <span class="material-icons-round" style="color: gray;">search</span>
+                    <input type="text" placeholder="Buscar producto..." oninput="searchProducts(this.value)">
+                </div>
+            </header>
+
+            <div id="inventory-list" class="grid-container">
+                </div>
+        </section>
+
+        <section id="view-featured" style="display: none;">
+            <header class="header">
+                <h1>Carrusel Principal</h1>
+            </header>
+            <div style="background: #F9FAFB; border: 1px solid #E6E2D3; padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; align-items: center; gap: 20px;">
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 5px 0; color: #556B2F; font-family: 'Playfair Display', serif;">🎥 Video de Portada</h4>
+                    <p style="margin: 0; font-size: 0.8rem; color: gray;">Pega aquí el enlace de YouTube (Ej: https://youtube.com/watch?v=XYZ...)</p>
+                </div>
+                <div style="flex: 2; display: flex; gap: 10px;">
+                    <input type="text" id="youtube-url-input" placeholder="Pegar enlace de YouTube..." class="input-mini" style="background: white;">
+                    <button onclick="saveVideoConfig()" class="primary" style="white-space: nowrap;">Guardar Video</button>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #E6E2D3;">
+                    <h3 style="color: #556B2F; font-family: 'Playfair Display', serif;">⭐ Visibles en Web</h3>
+                    <div id="featured-active-list"></div>
+                </div>
+                <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid #E6E2D3;">
+                    <h3 style="color: #2C3325; font-family: 'Playfair Display', serif;">➕ Agregar Nuevo</h3>
+                    <input type="text" placeholder="Buscar..." oninput="searchForFeature(this.value)" class="input-mini" style="margin-bottom: 10px;">
+                    <div id="featured-search-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-config" style="display: none;">
+            <header class="header">
+                <h1>Identidad Autentika</h1>
+                <button onclick="saveBrandConfig()" class="primary">Guardar Cambios</button>
+            </header>
+        
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                
+                <div style="background: white; padding: 25px; border-radius: 16px; border: 1px solid #E6E2D3;">
+                    <h3 style="color: #556B2F; font-family: 'Playfair Display', serif; margin-bottom: 20px;">Logotipo & Nombre</h3>
+                    
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img id="preview-logo" src="" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; background: #f9f9f9;">
+                        <br>
+                        <input type="file" id="logo-upload" onchange="uploadAsset('logo')" style="margin-top: 10px; font-size: 0.8rem;">
+                    </div>
+        
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label>Nombre del Negocio</label>
+                        <input type="text" id="config-name" class="input-mini" placeholder="Ej: Autentika">
+                    </div>
+        
+                    <div class="input-group">
+                        <label>Video Youtube (URL)</label>
+                        <input type="text" id="config-video" class="input-mini" placeholder="https://youtube.com...">
+                    </div>
+                </div>
+        
+                <div style="background: white; padding: 25px; border-radius: 16px; border: 1px solid #E6E2D3;">
+                    <h3 style="color: #556B2F; font-family: 'Playfair Display', serif; margin-bottom: 20px;">Nuestra Historia</h3>
+                    
+                    <textarea id="config-history" 
+                        placeholder="Cuenta cómo nació tu marca..." 
+                        style="width: 100%; height: 300px; padding: 15px; border: 1px solid #E5E7EB; border-radius: 8px; font-family: 'Lato'; resize: vertical; line-height: 1.6; overflow-y: auto;">
+                    </textarea>
+                    
+                    <h4 style="margin-top: 20px; color: #2C3325;">Fotos del Negocio (Máx 2)</h4>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <img id="preview-showcase-1" src="" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; background: #eee; margin-bottom: 5px;">
+                            <input type="file" id="showcase-upload-1" onchange="uploadAsset('showcase1')" style="font-size: 0.7rem; width: 100%;">
+                        </div>
+                        <div style="flex: 1;">
+                            <img id="preview-showcase-2" src="" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; background: #eee; margin-bottom: 5px;">
+                            <input type="file" id="showcase-upload-2" onchange="uploadAsset('showcase2')" style="font-size: 0.7rem; width: 100%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-users" style="display: none;">
+            <header class="header">
+                <h1>Gestión de Acceso</h1>
+            </header>
+        
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                
+                <div style="background: white; padding: 25px; border-radius: 16px; border: 1px solid #E6E2D3; height: fit-content;">
+                    <h3 style="color: #556B2F; font-family: 'Playfair Display', serif; margin-bottom: 20px;">Crear Nuevo Admin</h3>
+                    
+                    <form onsubmit="createNewUser(event)">
+                        <div class="input-group" style="margin-bottom: 15px;">
+                            <label>Nombre de Usuario</label>
+                            <input type="text" id="new-user-name" class="input-mini" required placeholder="Ej: vendedor1">
+                        </div>
+        
+                        <div class="input-group" style="margin-bottom: 20px;">
+                            <label>Contraseña</label>
+                            <input type="password" id="new-user-pass" class="input-mini" required placeholder="******">
+                        </div>
+        
+                        <button type="submit" class="btn-save" style="background: #2C3325;">Crear Usuario</button>
+                    </form>
+                </div>
+        
+                <div style="background: white; padding: 25px; border-radius: 16px; border: 1px solid #E6E2D3;">
+                    <h3 style="color: #2C3325; font-family: 'Playfair Display', serif; margin-bottom: 20px;">Usuarios Activos</h3>
+                    <div id="users-list-container">
+                        <p>Cargando...</p>
+                    </div>
+                </div>
+        
+            </div>
+        </section>
+
+    </main>
+
+    <div id="modal-photo" class="modal hidden">
+        <div class="modal-content">
+            <h3 style="font-family: 'Playfair Display', serif;">Actualizar Foto</h3>
+            <p id="modal-prod-name" style="color: #556B2F; margin-bottom: 20px;">Producto</p>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 0.8rem; font-weight: bold; color: gray;">Orientación:</label>
+                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                    <label style="flex: 1; border: 1px solid #ddd; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer;">
+                        <input type="radio" name="img-orient" value="vertical" checked> Vertical 📱
+                    </label>
+                    <label style="flex: 1; border: 1px solid #ddd; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer;">
+                        <input type="radio" name="img-orient" value="horizontal"> Horizontal 🖼️
+                    </label>
+                </div>
+            </div>
+
+            <input type="file" id="file-input" style="margin-bottom: 20px;">
+            <div class="actions">
+                <button onclick="closeModal()" style="background: transparent; color: gray;">Cancelar</button>
+                <button class="primary" onclick="uploadPhoto()">Subir Foto</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="modal-order-details" class="modal hidden">
+        <div class="modal-content" style="max-width: 700px; width: 95%;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+                <div>
+                    <span style="font-size: 0.8rem; color: #556B2F; font-weight: bold; letter-spacing: 1px;">ORDEN DE COMPRA</span>
+                    <h2 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 2rem; color: #2C3325;">Pedido #<span id="detail-id">000</span></h2>
+                </div>
+                <button onclick="closeOrderModal()" style="border: none; background: #f5f5f5; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; color: #666; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+    
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 25px;">
+                
+                <div style="background: #F9FAFB; padding: 20px; border-radius: 12px; border: 1px solid #E5E7EB;">
+                    <h4 style="margin: 0 0 15px 0; color: #556B2F; font-size: 0.9rem; text-transform: uppercase; border-bottom: 1px solid #ddd; padding-bottom: 5px;">👤 Datos del Cliente</h4>
+                    
+                    <p style="margin: 5px 0; font-size: 0.85rem; color: #888;">Nombre Completo</p>
+                    <p id="detail-client" style="margin: 0 0 10px 0; font-weight: bold; color: #333; font-size: 1.1rem;">-</p>
+    
+                    <p style="margin: 5px 0; font-size: 0.85rem; color: #888;">Cédula / NIT</p>
+                    <p id="detail-cedula" style="margin: 0 0 10px 0; font-weight: bold; color: #333;">-</p>
+    
+                    <p style="margin: 5px 0; font-size: 0.85rem; color: #888;">Celular / Contacto</p>
+                    <p id="detail-phone" style="margin: 0 0 10px 0; font-weight: bold; color: #333;">-</p>
+                    
+                    <a id="btn-whatsapp" href="#" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #25D366; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 15px; box-shadow: 0 4px 6px rgba(37, 211, 102, 0.2); transition: transform 0.2s;">
+                        <span class="material-icons-round" style="font-size: 18px;">chat</span>
+                        Contactar Cliente
+                    </a>
+                </div>
+    
+                <div style="background: #F9FAFB; padding: 20px; border-radius: 12px; border: 1px solid #E5E7EB;">
+                    <h4 style="margin: 0 0 15px 0; color: #556B2F; font-size: 0.9rem; text-transform: uppercase; border-bottom: 1px solid #ddd; padding-bottom: 5px;">📍 Envío y Pago</h4>
+    
+                    <p style="margin: 5px 0; font-size: 0.85rem; color: #888;">Ubicación</p>
+                    <p id="detail-location" style="margin: 0 0 10px 0; font-weight: bold; color: #333;">-</p>
+    
+                    <p style="margin: 5px 0; font-size: 0.85rem; color: #888;">Dirección Exacta</p>
+                    <p id="detail-address" style="margin: 0 0 10px 0; font-weight: bold; color: #333;">-</p>
+    
+                    <p style="margin: 5px 0; font-size: 0.85rem; color: #888;">Barrio / Conjunto</p>
+                    <p id="detail-barrio" style="margin: 0 0 10px 0; font-weight: bold; color: #333;">-</p>
+    
+                    <div style="background: #fff; border: 1px solid #E6E2D3; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <p style="margin: 0; font-size: 0.8rem; color: #888;">Método de Pago:</p>
+                        <p id="detail-method" style="margin: 2px 0 0 0; font-weight: bold; color: #556B2F;">-</p>
+                    </div>
+                </div>
+            </div>
+    
+            <h4 style="margin: 0 0 10px 0; font-family: 'Playfair Display', serif; color: #2C3325;">Resumen de Productos</h4>
+            <div id="detail-products" style="background: white; border: 1px solid #eee; border-radius: 8px; padding: 15px; max-height: 200px; overflow-y: auto; margin-bottom: 20px;">
+                </div>
+    
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #f0f0f0; padding-top: 20px;">
+                <div>
+                    <span style="font-size: 0.9rem; color: #888;">Total a Cobrar:</span>
+                    <div id="detail-total" style="font-size: 2rem; font-family: 'Playfair Display', serif; font-weight: bold; color: #2C3325;">$0</div>
+                </div>
+                
+                <div id="detail-actions">
+                    </div>
+            </div>
+    
+        </div>
+    </div>
+
+    <script src="manager.js"></script>
+</body>
+</html>

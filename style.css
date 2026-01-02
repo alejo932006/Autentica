@@ -1,0 +1,52 @@
+/* Animaciones personalizadas */
+.fade-in { 
+    animation: fadeIn 0.8s ease-out forwards; 
+    opacity: 0; /* Inicia invisible */
+}
+
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(20px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+/* Scrollbar elegante */
+::-webkit-scrollbar { 
+    width: 6px; 
+}
+::-webkit-scrollbar-track { 
+    background: #F9F7F2; 
+}
+::-webkit-scrollbar-thumb { 
+    background: #8FBC8F; 
+    border-radius: 10px; 
+}
+::-webkit-scrollbar-thumb:hover { 
+    background: #556B2F; 
+}
+
+/* Efecto Flotar */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center; align-items: center; z-index: 1000;
+}
+
+.modal-content {
+    background: #fff; padding: 20px; border-radius: 8px;
+    max-width: 500px; width: 90%; position: relative;
+}
+
+/* El contenedor de descripción debe tener margen para separarse del precio */
+#modal-desc-container {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    color: #555;
+}

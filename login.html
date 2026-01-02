@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Admin - Autentika</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#F9F7F2] h-screen flex items-center justify-center">
+
+    <div class="bg-white p-10 rounded-2xl shadow-2xl border border-[#E6E2D3] w-full max-w-sm">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-serif text-[#2C3325] font-bold">Autentika</h1>
+            <p class="text-[#556B2F] text-xs tracking-[0.2em] uppercase mt-2 font-bold">Panel de Control</p>
+        </div>
+
+        <form id="login-form" class="space-y-5">
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Usuario</label>
+                <input type="text" id="usuario" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-[#556B2F] text-[#2C3325]" required>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Contraseña</label>
+                <input type="password" id="password" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-[#556B2F]" required>
+            </div>
+            
+            <p id="error-msg" class="text-red-500 text-xs font-bold text-center hidden"></p>
+
+            <button type="submit" class="w-full bg-[#2C3325] hover:bg-[#556B2F] text-white py-3 rounded-lg font-bold transition-colors uppercase tracking-widest text-xs">
+                Ingresar
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const usuario = document.getElementById('usuario').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-msg');
+
+            try {
+                const res = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    localStorage.setItem('autentica_token', data.token);
+                    window.location.href = 'manager.html';
+                } else {
+                    throw new Error(data.error || "Credenciales incorrectas");
+                }
+            } catch (err) {
+                errorMsg.innerText = err.message;
+                errorMsg.classList.remove('hidden');
+            }
+        };
+    </script>
+</body>
+</html>
