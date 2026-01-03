@@ -50,3 +50,12 @@
     margin-bottom: 15px;
     color: #555;
 }
+
+/* Ocultar scrollbar en filtros móviles pero permitir scroll */
+#mobile-filters::-webkit-scrollbar {
+    display: none;
+}
+#mobile-filters {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

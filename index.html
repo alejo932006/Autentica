@@ -79,7 +79,7 @@
     <div class="container mx-auto px-6 py-4 flex justify-between items-center">
         <a href="#" class="flex items-center gap-3 group">
             <div class="w-12 h-12 overflow-hidden rounded-full border border-brand-sand shadow-sm group-hover:shadow-md transition-all duration-500">
-                <img id="brand-logo" src="https://via.placeholder.com/100?text=A" alt="Logo" class="w-full h-full object-cover">
+                <img id="brand-logo" src="logo.jpg" alt="Logo" class="w-full h-full object-cover">
             </div>
             <div class="flex flex-col">
                 <span id="brand-name" class="text-2xl font-serif font-bold leading-none tracking-tight text-brand-dark">
@@ -223,7 +223,7 @@
 <section id="featured-section" class="hidden relative py-12 bg-white">
     <div class="container mx-auto px-6">
         <div class="flex items-center gap-4 mb-8">
-            <h3 class="text-2xl font-serif text-brand-dark italic">Favoritos del Mes</h3>
+            <h3 class="text-2xl font-serif text-brand-dark italic">Ofertas Del Mes</h3>
             <div class="h-px flex-1 bg-brand-sand"></div>
         </div>
 
@@ -251,67 +251,135 @@
     </div>
 
     <div class="container mx-auto px-6 relative z-10">
-        
-        <div class="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
-            <span class="text-xs font-bold tracking-[0.3em] text-brand-olive uppercase mb-4 block">Shop The Look</span>
-            <h2 class="text-4xl md:text-5xl font-serif text-brand-dark mb-6">Nuestra Colección</h2>
-            <div class="flex items-center justify-center gap-2 opacity-50 mb-6">
-                <div class="w-12 h-px bg-brand-olive"></div>
-                <div class="w-2 h-2 rounded-full border border-brand-olive"></div>
-                <div class="w-12 h-px bg-brand-olive"></div>
-            </div>
-            <p class="text-gray-500 font-light text-lg leading-relaxed">
-                Explora tratamientos capilares y esenciales de belleza. <br class="hidden md:block">Fórmulas limpias para resultados reales.
-            </p>
+    
+        <div class="mb-8 border-b border-gray-200 pb-4">
+            <h2 class="text-3xl font-serif text-brand-dark">Colección</h2>
+            <p class="text-sm text-gray-500 mt-1">Explora nuestros productos naturales</p>
         </div>
-
-        <div class="flex flex-col md:flex-row justify-between items-end gap-8 mb-16 border-b border-gray-100 pb-6">
+    
+        <div class="flex flex-col lg:flex-row gap-10 items-start">
             
-            <div class="w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-                <div id="category-filters" class="flex gap-3">
+            <div class="w-full lg:flex-1 order-2 lg:order-1">
+                
+                <div class="lg:hidden mb-6">
+                    <input type="text" oninput="searchProductsFront(this.value)" placeholder="Buscar producto..." class="w-full p-3 border border-gray-300 rounded-lg font-sans">
+                    <div id="mobile-filters" class="flex gap-2 overflow-x-auto mt-3 pb-2 scrollbar-hide">
+                        </div>
+                </div>
+    
+                <div class="hidden lg:flex justify-between items-center mb-6">
+                    <span class="text-sm text-gray-500">Mostrando resultados</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-brand-dark">Ordenar por:</span>
+                        <select onchange="sortProducts(this.value)" class="text-sm border-none bg-transparent font-medium text-gray-600 focus:ring-0 cursor-pointer hover:text-brand-olive outline-none">
+                            <option value="relevancia">Relevancia</option>
+                            <option value="menor_precio">Menor precio</option>
+                            <option value="mayor_precio">Mayor precio</option>
+                        </select>
                     </div>
+                </div>
+    
+                <div id="loader" class="flex flex-col justify-center items-center py-20 hidden">
+                    <div class="animate-spin text-brand-olive mb-4"><i data-lucide="loader-2" class="w-10 h-10"></i></div>
+                    <p class="text-gray-400 text-xs font-bold tracking-widest uppercase">Cargando...</p>
+                </div>
+    
+                <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 fade-in min-h-[400px]"></div>
+    
+                <div id="empty-state" class="hidden text-center py-24 bg-gray-50 rounded-xl mt-8">
+                    <div class="inline-block p-4 rounded-full bg-white shadow-sm mb-4">
+                        <i data-lucide="search-x" class="w-6 h-6 text-brand-olive"></i>
+                    </div>
+                    <p class="text-gray-500">No encontramos productos con esa búsqueda.</p>
+                </div>
+    
+                <div id="load-more-container" class="hidden text-center mt-12">
+                    <button onclick="loadMoreProducts()" class="text-brand-olive font-bold text-sm uppercase tracking-widest border-b border-brand-olive pb-1 hover:text-brand-dark hover:border-brand-dark transition-all">
+                        Ver más productos
+                    </button>
+                </div>
             </div>
-
-            <div class="w-full md:w-72 relative group">
-                <input 
-                    type="text" 
-                    id="search-input"
-                    oninput="searchProductsFront(this.value)" 
-                    placeholder="Buscar shampoo, crema..." 
-                    class="w-full py-2 bg-transparent border-b border-gray-300 focus:border-brand-olive outline-none text-brand-dark placeholder-gray-400 transition-all font-serif pr-8"
-                >
-                <i data-lucide="search" class="absolute right-0 top-2 w-5 h-5 text-gray-400 group-hover:text-brand-olive transition-colors"></i>
-            </div>
+    
+            <aside class="w-full lg:w-64 flex-shrink-0 order-1 lg:order-2 hidden lg:block sticky top-24">
+                
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6">
+                    <h3 class="font-bold text-brand-dark text-sm mb-3 uppercase tracking-wider">Búsqueda</h3>
+                    <div class="relative">
+                        <input type="text" oninput="searchProductsFront(this.value)" placeholder="Buscar..." class="w-full pl-3 pr-8 py-2 text-sm border-b border-gray-300 focus:border-brand-olive outline-none bg-transparent font-sans">
+                        <i data-lucide="search" class="absolute right-0 top-2 w-4 h-4 text-gray-400"></i>
+                    </div>
+                </div>
+    
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-brand-dark text-sm mb-4 uppercase tracking-wider">Categorías</h3>
+                    <ul id="sidebar-filters" class="space-y-3 text-sm">
+                        </ul>
+                </div>
+    
+                <div class="mt-6 p-4 bg-brand-cream rounded-lg border border-brand-olive/20 text-center">
+                    <div class="bg-brand-olive/10 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-brand-olive"></i>
+                    </div>
+                    <p class="text-xs text-brand-dark font-bold">Compra Protegida</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Garantía directa en todos tus productos.</p>
+                </div>
+    
+            </aside>
+    
         </div>
-
-        <div id="loader" class="flex flex-col justify-center items-center py-20">
-            <div class="animate-spin text-brand-olive mb-4">
-                <i data-lucide="loader-2" class="w-10 h-10"></i>
-            </div>
-            <p class="text-gray-400 text-xs font-bold tracking-widest uppercase">Cargando productos...</p>
-        </div>
-
-        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16 fade-in min-h-[400px]"></div>
-        
-        <div id="load-more-container" class="hidden text-center mt-20">
-             <button onclick="loadMoreProducts()" class="inline-flex items-center gap-3 px-8 py-3 border border-gray-200 rounded-full hover:border-brand-olive hover:text-brand-olive transition-all font-bold text-xs tracking-widest uppercase text-gray-500">
-                Descubrir más <i data-lucide="arrow-down" class="w-4 h-4"></i>
-            </button>
-            <p class="text-[10px] text-gray-300 mt-4 uppercase tracking-wider">
-                Mostrando <span id="showing-count">0</span> de <span id="total-count">0</span>
-            </p>
-        </div>
-
-        <div id="empty-state" class="hidden text-center py-24 bg-brand-cream/20 rounded-3xl mt-8">
-            <div class="inline-block p-4 rounded-full bg-white shadow-sm mb-4">
-                <i data-lucide="search-x" class="w-6 h-6 text-brand-olive"></i>
-            </div>
-            <h4 class="text-xl font-serif text-gray-900">Sin resultados</h4>
-            <p class="text-gray-500 font-light mt-2 text-sm">Intenta buscar con otro término.</p>
-        </div>
-
     </div>
 </section>
+
+<footer class="bg-[#2C3325] text-[#F9F7F2] py-8 border-t border-[#556B2F]/30 relative overflow-hidden text-sm">
+    
+    <div class="container mx-auto px-6 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            
+            <div class="flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full border border-[#556B2F] overflow-hidden">
+                        <img id="brand-logo-footer" src="logo.jpg" alt="Logo" class="w-full h-full object-cover opacity-80">                    </div>
+                    <span class="text-xl font-serif font-bold tracking-tight">Autentika</span>
+                </div>
+                
+                <div class="flex gap-3 mt-1">
+                    <a href="#" class="hover:text-[#556B2F] transition-colors"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+                    <a href="#" class="hover:text-[#556B2F] transition-colors"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                    <a href="https://wa.me/573165294505" target="_blank" class="hover:text-[#556B2F] transition-colors"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h4 class="font-bold text-[#556B2F] uppercase text-xs tracking-widest mb-1">Ubicación</h4>
+                <div class="flex gap-2 items-start text-gray-300">
+                    <i data-lucide="map-pin" class="w-4 h-4 text-[#556B2F] flex-shrink-0 mt-0.5"></i>
+                    <div>
+                        <p class="font-medium text-white">Caicedonia, Valle del Cauca</p>
+                        <p>Supermercado Surtitodo Ideal, Local 1</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h4 class="font-bold text-[#556B2F] uppercase text-xs tracking-widest mb-1">Atención</h4>
+                <p class="flex items-center gap-2 text-gray-300">
+                    <i data-lucide="phone" class="w-3 h-3 text-[#556B2F]"></i> +57 316 529 4505
+                </p>
+                <p class="flex items-center gap-2 text-gray-300">
+                    <i data-lucide="clock" class="w-3 h-3 text-[#556B2F]"></i> Lun-Sab: 9am - 7pm
+                </p>
+            </div>
+
+        </div>
+
+        <div class="border-t border-[#556B2F]/20 mt-8 pt-4 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-500">
+            <p>&copy; 2025 Autentika Beauty.</p>
+            <div class="flex gap-2 mt-2 md:mt-0">
+                <span>Nequi</span> &bull; <span>Efectivo</span> &bull; <span>Bancolombia</span>
+            </div>
+        </div>
+    </div>
+</footer>
 
 <div id="cart-sidebar" class="fixed inset-0 z-50 hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
     <div class="absolute inset-0 bg-brand-dark/30 backdrop-blur-sm transition-opacity" onclick="toggleCart()"></div>
@@ -457,8 +525,8 @@
             <button onclick="toggleContactModal()" class="sticky top-4 right-4 float-right z-10 text-gray-400 hover:text-brand-dark bg-white/50 rounded-full p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
             
             <div class="p-10 text-center">
-                <div class="w-24 h-24 rounded-full bg-brand-cream border border-brand-olive/20 mx-auto mb-6 flex items-center justify-center overflow-hidden">
-                   <img id="brand-logo-modal" src="" class="w-full h-full object-cover">
+                <div class="w-8 h-8 rounded-full border border-[#556B2F] overflow-hidden">
+                    <img id="brand-logo-modal" src="logo.jpg" alt="Logo" class="w-full h-full object-cover opacity-80">
                 </div>
                 
                 <h3 class="text-2xl font-serif text-brand-dark mb-4" id="brand-name-modal">Autentika</h3>

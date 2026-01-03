@@ -130,67 +130,66 @@ function renderProducts(products) {
     loadMoreProducts();
 }
 
-// --- NUEVA FUNCIÓN PARA EL BOTÓN "CARGAR MÁS" ---
+// Reemplaza tu función window.loadMoreProducts en app.js por esta:
+
+// Reemplaza tu función window.loadMoreProducts en app.js por esta versión "Mobile Friendly":
+
 window.loadMoreProducts = () => {
     const grid = document.getElementById('products-grid');
     const btnContainer = document.getElementById('load-more-container');
     
-    // Calcular el siguiente lote
     const nextBatch = currentListForDisplay.slice(itemsShown, itemsShown + ITEMS_PER_BATCH);
     
-    // Renderizar este lote
     nextBatch.forEach(p => {
         const precio = formatCurrency(p.precio);
         
-        // Lógica simplificada de imagen: siempre vertical y limpia para belleza
+        // CAMBIO 1: Altura de imagen adaptable (h-40 en móvil / h-64 en PC)
         const imgContent = p.imagen_url 
-            ? `<img src="${p.imagen_url}" class="h-64 w-full object-cover group-hover:scale-105 transition duration-700 ease-in-out" loading="lazy" alt="${p.nombre}">`
-            : `<div class="h-64 w-full flex items-center justify-center bg-gray-50 text-gray-300"><i data-lucide="image" class="w-10 h-10"></i></div>`;
+            ? `<img src="${p.imagen_url}" class="h-40 md:h-64 w-full object-cover group-hover:scale-105 transition duration-700 ease-in-out" loading="lazy" alt="${p.nombre}">`
+            : `<div class="h-40 md:h-64 w-full flex items-center justify-center bg-gray-50 text-gray-300"><i data-lucide="image" class="w-8 h-8 md:w-10 md:h-10"></i></div>`;
 
         const card = document.createElement('div');
-        // Estilo: Borde muy sutil, fondo blanco, sin sombras duras
         card.className = "bg-white group cursor-pointer fade-in relative"; 
         
         card.onclick = (e) => { if(!e.target.closest('.add-btn-direct')) openModal(p); };
 
         card.innerHTML = `
-            <div class="relative overflow-hidden rounded-2xl bg-gray-100 mb-4 shadow-sm border border-gray-100">
+            <div class="relative overflow-hidden rounded-xl md:rounded-2xl bg-gray-100 mb-3 shadow-sm border border-gray-100">
                 ${imgContent}
                 
-                ${p.cantidad < 5 ? `<span class="absolute top-3 left-3 bg-white/90 backdrop-blur text-red-800 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Últimas und</span>` : ''}
+                ${p.cantidad < 5 ? `<span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-red-800 text-[9px] md:text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Últimos</span>` : ''}
                 
                 <button onclick="addToCartById('${p.id}'); event.stopPropagation();" 
-                    class="add-btn-direct absolute bottom-3 right-3 w-10 h-10 bg-white hover:bg-brand-olive hover:text-white rounded-full shadow-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
-                    <i data-lucide="plus" class="w-5 h-5"></i>
+                    class="add-btn-direct absolute bottom-2 right-2 w-8 h-8 md:bottom-3 md:right-3 md:w-10 md:h-10 bg-white hover:bg-brand-olive hover:text-white rounded-full shadow-lg flex items-center justify-center transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 md:translate-y-2 md:group-hover:translate-y-0">
+                    <i data-lucide="plus" class="w-4 h-4 md:w-5 md:h-5"></i>
                 </button>
             </div>
 
-            <div class="text-center px-2">
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">${p.linea || 'Cuidado General'}</p>
-                <h4 class="font-serif text-lg text-gray-900 leading-tight mb-2 group-hover:text-brand-olive transition-colors">${p.nombre}</h4>
-                <p class="font-light text-gray-900 text-lg">${precio}</p>
+            <div class="text-left px-1 md:text-center md:px-2">
+                <p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 truncate">${p.linea || 'Cuidado General'}</p>
+                <h4 class="font-serif text-sm md:text-lg text-gray-900 leading-tight mb-1 md:mb-2 group-hover:text-brand-olive transition-colors line-clamp-2 min-h-[2.5em]">${p.nombre}</h4>
+                <p class="font-light text-brand-dark text-sm md:text-lg">${precio}</p>
             </div>
         `;
         grid.appendChild(card);
     });
 
-    // Actualizar contador
     itemsShown += nextBatch.length;
     
-    // Actualizar textos del contador
-    document.getElementById('showing-count').innerText = itemsShown;
-    document.getElementById('total-count').innerText = currentListForDisplay.length;
+    const showingEl = document.getElementById('showing-count');
+    const totalEl = document.getElementById('total-count');
+    
+    if(showingEl) showingEl.innerText = itemsShown;
+    if(totalEl) totalEl.innerText = currentListForDisplay.length;
 
-    // Decidir si mostramos u ocultamos el botón
     if (itemsShown >= currentListForDisplay.length) {
-        btnContainer.classList.add('hidden'); // Ya mostramos todo
+        btnContainer.classList.add('hidden');
     } else {
-        btnContainer.classList.remove('hidden'); // Faltan productos
+        btnContainer.classList.remove('hidden');
     }
 
     lucide.createIcons();
 };
-
 // --- LOGICA CARRITO Y CHECKOUT ---
 
 window.showCheckoutForm = () => {
@@ -386,78 +385,134 @@ window.toggleCart = (forceOpen = null) => {
 // EN app.js
 
 window.openModal = (p) => {
-    // Llenar datos básicos
+    // 1. Llenar datos básicos
     document.getElementById('modal-title').innerText = p.nombre;
     document.getElementById('modal-price').innerText = formatCurrency(p.precio);
-    document.getElementById('modal-stock').innerText = p.cantidad || 0;
     
-    // Llenar categoría (Si existe el elemento en el HTML)
+    // Stock (Manejando posible null)
+    const stockEl = document.getElementById('modal-stock');
+    if(stockEl) stockEl.innerText = `Stock: ${p.cantidad || 0}`;
+    
+    // Categoría
     const catEl = document.getElementById('modal-category');
     if(catEl) catEl.innerText = p.linea || 'General';
 
-    // --- LÓGICA DE DESCRIPCIÓN (LA PARTE QUE PEDISTE) ---
+    // 2. LÓGICA DE DESCRIPCIÓN CORREGIDA
     const descEl = document.getElementById('modal-desc');
     
-    // Convertimos saltos de línea (\n) en <br> para que se vea bien el formato
-    // Y verificamos si hay texto real
-    if (p.descripcion && p.descripcion.trim() !== "") {
-        descEl.innerHTML = p.descripcion.replace(/\n/g, '<br>'); 
-        descEl.classList.remove('hidden'); // Mostrar si hay texto
-        descEl.style.display = 'block';    // Asegurar display block
+    if (p.descripcion && p.descripcion.trim().length > 0 && p.descripcion !== "null") {
+        // Reemplaza saltos de línea (\n) por <br> para que se vea bien el párrafo
+        descEl.innerHTML = p.descripcion.replace(/\n/g, '<br>');
+        descEl.classList.remove('hidden'); 
     } else {
+        // Si no hay descripción, ocultamos el elemento
         descEl.innerHTML = '';
-        descEl.classList.add('hidden');    // Ocultar totalmente si no hay texto
-        descEl.style.display = 'none';
+        descEl.classList.add('hidden');
     }
-    // ----------------------------------------------------
 
-    // Imagen
+    // 3. Imagen
     const container = document.getElementById('modal-img-container');
     container.innerHTML = p.imagen_url 
-        ? `<img src="${p.imagen_url}" class="max-h-full max-w-full object-contain">` 
+        ? `<img src="${p.imagen_url}" class="max-h-full max-w-full object-contain rounded-lg shadow-sm">` 
         : `<i data-lucide="package" class="w-24 h-24 text-gray-300"></i>`;
 
-    // Botón de agregar
-    document.getElementById('modal-add-btn').onclick = () => {
+    // 4. Configurar botón de agregar
+    const addBtn = document.getElementById('modal-add-btn');
+    // Clonamos el botón para eliminar listeners anteriores y evitar duplicados
+    const newBtn = addBtn.cloneNode(true);
+    addBtn.parentNode.replaceChild(newBtn, addBtn);
+    
+    newBtn.onclick = () => {
         addToCartById(p.id);
         document.getElementById('product-modal').classList.add('hidden');
     };
 
-    // Mostrar el modal (usando tu ID original de Tailwind)
+    // 5. Mostrar Modal
     document.getElementById('product-modal').classList.remove('hidden');
+    
+    // Recargar iconos (por si la imagen fallback usa lucide)
     lucide.createIcons();
 };
 
 window.closeModal = () => document.getElementById('product-modal').classList.add('hidden');
 
 function generateFilters() {
-    const filterContainer = document.getElementById('category-filters');
-    // Obtenemos categorías únicas
+    // 1. Obtener categorías únicas
     const lineas = ['Todas', ...new Set(allProducts.map(p => p.linea || 'General'))];
     
-    filterContainer.innerHTML = lineas.map(cat => `
-        <button onclick="filterBy('${cat}')" class="filter-btn whitespace-nowrap px-6 py-2 rounded-full text-xs font-bold tracking-wide transition-all border border-transparent">
-            ${cat}
-        </button>
-    `).join('');
-    
-    window.filterBy = (catName) => {
-        document.querySelectorAll('.filter-btn').forEach(b => {
-            const isActive = b.innerText.trim() === catName;
-            // Estilo Activo: Verde Oliva + Texto Blanco + Sombra suave
-            // Estilo Inactivo: Fondo Gris Muy Claro + Texto Gris + Hover Oscuro
-            b.className = isActive 
-                ? "filter-btn whitespace-nowrap px-6 py-2 rounded-full text-xs font-bold tracking-wide transition-all border border-brand-olive bg-brand-olive text-white shadow-md transform scale-105"
-                : "filter-btn whitespace-nowrap px-6 py-2 rounded-full text-xs font-bold tracking-wide transition-all border border-transparent bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-brand-dark";
-        });
-        
-        if (catName === 'Todas') renderProducts(allProducts);
-        else renderProducts(allProducts.filter(p => (p.linea || 'General') === catName));
-    };
+    // A. RENDERIZAR SIDEBAR (Desktop - Lista vertical estilo ML)
+    const sidebarContainer = document.getElementById('sidebar-filters');
+    if (sidebarContainer) {
+        sidebarContainer.innerHTML = lineas.map(cat => {
+            // Contar cuántos productos hay por categoría
+            const count = cat === 'Todas' ? allProducts.length : allProducts.filter(p => (p.linea || 'General') === cat).length;
+            
+            return `
+            <li>
+                <button onclick="filterBy('${cat}')" class="filter-link w-full text-left flex justify-between items-center group text-gray-600 hover:text-brand-olive transition-colors">
+                    <span class="font-medium group-hover:translate-x-1 transition-transform">${cat}</span>
+                    <span class="text-xs text-gray-400 font-light">(${count})</span>
+                </button>
+            </li>
+            `;
+        }).join('');
+    }
 
-    // Activar 'Todas' por defecto si hay datos
-    if(lineas.length > 0) window.filterBy('Todas');
+    // B. RENDERIZAR MÓVIL (Botones horizontales)
+    const mobileContainer = document.getElementById('mobile-filters');
+    if (mobileContainer) {
+        mobileContainer.innerHTML = lineas.map(cat => `
+            <button onclick="filterBy('${cat}')" class="filter-btn-mobile whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold border border-gray-200 bg-white text-gray-600">
+                ${cat}
+            </button>
+        `).join('');
+    }
 }
+
+// Actualizamos la función de filtrado para manejar los estilos activos en ambas listas
+window.filterBy = (catName) => {
+    // 1. Filtrar lógica
+    if (catName === 'Todas') renderProducts(allProducts);
+    else renderProducts(allProducts.filter(p => (p.linea || 'General') === catName));
+
+    // 2. Estilos Visuales (Desktop)
+    document.querySelectorAll('.filter-link').forEach(btn => {
+        const span = btn.querySelector('span');
+        if (span.innerText === catName) {
+            btn.classList.add('text-brand-olive', 'font-bold');
+            btn.classList.remove('text-gray-600');
+        } else {
+            btn.classList.remove('text-brand-olive', 'font-bold');
+            btn.classList.add('text-gray-600');
+        }
+    });
+
+    // 3. Estilos Visuales (Móvil)
+    document.querySelectorAll('.filter-btn-mobile').forEach(btn => {
+        if (btn.innerText.trim() === catName) {
+            btn.className = "filter-btn-mobile whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold border border-brand-olive bg-brand-olive text-white shadow-md";
+        } else {
+            btn.className = "filter-btn-mobile whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold border border-gray-200 bg-white text-gray-600";
+        }
+    });
+};
+
+// Nueva función para Ordenar (Precio / Relevancia)
+window.sortProducts = (criteria) => {
+    let sorted = [...currentListForDisplay]; // Copia de la lista actual filtrada
+    
+    if (criteria === 'menor_precio') {
+        sorted.sort((a, b) => parseFloat(a.precio) - parseFloat(b.precio));
+    } else if (criteria === 'mayor_precio') {
+        sorted.sort((a, b) => parseFloat(b.precio) - parseFloat(a.precio));
+    } else {
+        // Relevancia: Volvemos al orden original (o por ID)
+        sorted.sort((a, b) => a.id - b.id);
+    }
+    
+    renderProducts(sorted); // Volver a pintar
+};
+
 function setMode(mode) {
     currentMode = mode;
     const fbControls = document.getElementById('firebase-controls');
@@ -692,7 +747,8 @@ async function fetchConfig() {
             document.title = data.businessName; // Cambia título de la pestaña
         }
         if(data.logoUrl) {
-            document.querySelectorAll('#brand-logo, #brand-logo-modal').forEach(el => el.src = data.logoUrl);
+            // Actualizamos Header, Modal y Footer al mismo tiempo
+            document.querySelectorAll('#brand-logo, #brand-logo-modal, #brand-logo-footer').forEach(el => el.src = data.logoUrl);
         }
 
         // 3. Historia
@@ -748,41 +804,6 @@ document.addEventListener('DOMContentLoaded', () => {
    // ... resto de tu código init ...
 });
 
-function openProductModal(productData) {
-    // 1. Referencias a elementos del DOM
-    const modal = document.getElementById('productModal');
-    const title = document.getElementById('modal-title');
-    const img = document.getElementById('modal-img');
-    const price = document.getElementById('modal-price');
-    
-    // Referencias específicas para la descripción
-    const descContainer = document.getElementById('modal-desc-container');
-    const descText = document.getElementById('modal-desc-text');
-
-    // 2. Llenar datos básicos
-    title.innerText = productData.nombre;
-    img.src = productData.imagen_url;
-    price.innerText = "$" + productData.precio;
-
-    // 3. LÓGICA DE VALIDACIÓN (Aquí está lo que pediste)
-    // Verificamos si existe, si no es null, y si no es solo espacios en blanco.
-    if (productData.descripcion && productData.descripcion.trim() !== "") {
-        
-        // Si hay descripción configurada en el Manager:
-        descText.innerText = productData.descripcion;
-        descContainer.style.display = 'block'; // Mostramos el bloque
-        
-    } else {
-        
-        // Si NO hay descripción (comportamiento por defecto):
-        descText.innerText = "";
-        descContainer.style.display = 'none'; // Ocultamos todo el bloque para que no ocupe espacio visual
-        
-    }
-
-    // 4. Mostrar el modal
-    modal.style.display = 'flex';
-}
 
 
 lucide.createIcons();
