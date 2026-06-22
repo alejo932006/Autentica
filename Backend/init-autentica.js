@@ -1,13 +1,13 @@
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 
-// Configuración idéntica a tu server.js
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'FacturaAPP', 
-  password: '0534', 
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
 async function setupSecurity() {
@@ -23,8 +23,8 @@ async function setupSecurity() {
         console.log("✅ Tabla 'usuarios_admin' verificada.");
 
         // 2. Crear usuario Admin
-        const usuario = 'admin'; 
-        const password = '123'; // <--- CAMBIA ESTO POR TU CONTRASEÑA
+        const usuario = process.env.ADMIN_USER;
+        const password = process.env.ADMIN_PASSWORD;
 
         // Encriptar password
         const salt = await bcrypt.genSalt(10);

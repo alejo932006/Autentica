@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
@@ -6,10 +6,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const JWT_SECRET = 'autentica_secret_key_2026'; // O process.env.JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Middleware para proteger rutas
 const verifyToken = (req, res, next) => {
@@ -27,7 +27,7 @@ const verifyToken = (req, res, next) => {
 
 // --- CONFIGURACIÓN DE URL ---
 // Cuando subas a Cloudflare, cambias esto por 'https://api.tshoptechnology.com'
-const BASE_URL = 'http://localhost:3000'; 
+const BASE_URL = process.env.BASE_URL; 
 
 // Configuración de almacenamiento de imágenes
 const storage = multer.diskStorage({
@@ -49,11 +49,11 @@ app.use('/uploads', express.static('uploads'));
 
 // Base de Datos
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'FacturaAPP', 
-  password: '0534', 
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
 // --- SISTEMA DE CONFIGURACIÓN (VIDEO Y EXTRAS) ---
