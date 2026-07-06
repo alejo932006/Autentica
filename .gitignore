@@ -1,7 +1,9 @@
 node_modules/
 Backend/node_modules/
 .env
+Backend/.env
 .DS_Store
-uploads/
-Backend/uploads/
+/uploads/
+Backend/uploads/*
+!Backend/uploads/logo.jpg
 .wrangler/

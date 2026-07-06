@@ -1,4 +1,5 @@
-require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+require('./load-env');
+const { getDbConfig } = require('./load-env');
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
@@ -60,32 +61,43 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
 // Base de Datos
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
+const pool = new Pool(getDbConfig());
 
 // --- SISTEMA DE CONFIGURACIÓN (VIDEO Y EXTRAS) ---
 // --- SISTEMA DE CONFIGURACIÓN (Actualizado) ---
 const CONFIG_FILE = 'store_config.json';
+const DEFAULT_LOGO = '/uploads/logo.jpg';
+
+function resolveAssetUrl(url) {
+    const path = url || DEFAULT_LOGO;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    return `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+}
+
+function getPublicConfig() {
+    const defaults = {
+        businessName: 'Autentika',
+        historyText: 'Escribe aquí tu historia...',
+        logoUrl: DEFAULT_LOGO,
+        showcaseImages: [],
+        youtubeId: '',
+    };
+
+    let config = { ...defaults };
+    if (fs.existsSync(CONFIG_FILE)) {
+        config = { ...defaults, ...JSON.parse(fs.readFileSync(CONFIG_FILE)) };
+    }
+
+    return {
+        ...config,
+        logoUrl: resolveAssetUrl(config.logoUrl),
+        showcaseImages: (config.showcaseImages || []).map(resolveAssetUrl),
+    };
+}
 
 // 1. Leer Configuración
 app.get('/api/config', (req, res) => {
-    if (fs.existsSync(CONFIG_FILE)) {
-        res.json(JSON.parse(fs.readFileSync(CONFIG_FILE)));
-    } else {
-        // Configuración por defecto si no existe archivo
-        res.json({ 
-            businessName: 'Autentika', 
-            historyText: 'Escribe aquí tu historia...',
-            logoUrl: '',
-            showcaseImages: [],
-            youtubeId: ''
-        });
-    }
+    res.json(getPublicConfig());
 });
 
 // 2. Guardar Configuración General

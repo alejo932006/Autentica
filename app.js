@@ -748,10 +748,10 @@ async function fetchConfig() {
             document.querySelectorAll('#brand-name, #brand-name-modal').forEach(el => el.innerText = data.businessName);
             document.title = data.businessName; // Cambia título de la pestaña
         }
-        if(data.logoUrl) {
-            // Actualizamos Header, Modal y Footer al mismo tiempo
-            document.querySelectorAll('#brand-logo, #brand-logo-modal, #brand-logo-footer').forEach(el => el.src = data.logoUrl);
-        }
+        const brandLogo = data.logoUrl || `${API_BASE_URL}/uploads/logo.jpg`;
+        document.querySelectorAll('#brand-logo, #brand-logo-modal, #brand-logo-footer').forEach(el => {
+            el.src = brandLogo;
+        });
 
         // 3. Historia
         if(data.historyText) {
