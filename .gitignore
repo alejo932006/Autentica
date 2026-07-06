@@ -1,4 +1,7 @@
 node_modules/
+Backend/node_modules/
 .env
 .DS_Store
 uploads/
+Backend/uploads/
+.wrangler/

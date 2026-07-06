@@ -15,8 +15,10 @@ import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/1
 // const app = initializeApp(firebaseConfig);
 // const auth = getAuth(app);
 
-// --- CONFIGURACIÓN FIJA ---
-const API_BASE_URL = 'http://localhost:3000'; // Tu servidor real
+// --- API: local en desarrollo, producción en api.autentika.com ---
+const API_BASE_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? 'http://localhost:8080'
+    : 'https://api.autentika.com';
 
 // --- ESTADO ---
 let allProducts = [];
@@ -236,7 +238,7 @@ async function submitOrder(e) {
     };
 
     const urlInput = document.getElementById('tunnel-url');
-    let url = urlInput.value.trim() || 'http://localhost:3000';
+    let url = urlInput.value.trim() || API_BASE_URL;
     url = url.replace(/\/$/, "");
 
     try {

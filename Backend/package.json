@@ -1,13 +1,12 @@
 {
-  "name": "pagina-web-tshp",
+  "name": "autentika-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "description": "API Autentika — Express + PostgreSQL",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "init-db": "node init-autentica.js"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {

@@ -6,7 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -25,9 +25,16 @@ const verifyToken = (req, res, next) => {
     });
 };
 
-// --- CONFIGURACIÓN DE URL ---
-// Cuando subas a Cloudflare, cambias esto por 'https://api.tshoptechnology.com'
-const BASE_URL = process.env.BASE_URL; 
+const BASE_URL = process.env.BASE_URL;
+
+const allowedOrigins = [
+    'https://autentika.com',
+    'https://www.autentika.com',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
+];
 
 // Configuración de almacenamiento de imágenes
 const storage = multer.diskStorage({
@@ -43,7 +50,12 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-app.use(cors());
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+        else callback(new Error('CORS no permitido'));
+    },
+}));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 

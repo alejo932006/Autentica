@@ -4,7 +4,10 @@ if (!token) {
 }
 
 // Configuración de la API
-const API_URL = 'http://localhost:3000/api'; 
+const API_ORIGIN = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? 'http://localhost:8080'
+    : 'https://api.autentika.com';
+const API_URL = `${API_ORIGIN}/api`; 
 
 // --- ESTA ES LA FUNCIÓN QUE TE FALTABA ---
 async function authFetch(endpoint, options = {}) {
