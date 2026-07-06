@@ -28,8 +28,8 @@ const verifyToken = (req, res, next) => {
 const BASE_URL = process.env.BASE_URL;
 
 const allowedOrigins = [
-    'https://autentika.com',
-    'https://www.autentika.com',
+    'https://auntentika.com',
+    'https://www.auntentika.com',
     'http://localhost:5500',
     'http://127.0.0.1:5500',
     'http://localhost:8080',

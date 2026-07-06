@@ -1,5 +1,5 @@
-# Túnel Cloudflare: expone el backend Autentika (localhost:8080) en api.autentika.com
-# sin abrir puertos en el router. Requiere dominio autentika.com en Cloudflare.
+# Túnel Cloudflare: expone el backend Autentika (localhost:8080) en api.auntentika.com
+# sin abrir puertos en el router. Requiere dominio auntentika.com en Cloudflare.
 #
 # === SETUP (una sola vez, en el servidor Windows) ===
 #
@@ -12,7 +12,7 @@
 #      cloudflared tunnel create autentika-api
 #
 # 4. Crear DNS:
-#      cloudflared tunnel route dns autentika-api api.autentika.com
+#      cloudflared tunnel route dns autentika-api api.auntentika.com
 #
 # 5. Copiar este archivo a:
 #      C:\Users\TU_USUARIO\.cloudflared\autentika-api.yml
@@ -23,15 +23,15 @@
 #      pm2 save
 #
 # 7. Verificar:
-#      https://api.autentika.com/api/products
+#      https://api.auntentika.com/api/products
 #
-# NOTA: autentika.com (frontend) lo sirve Cloudflare Pages desde GitHub.
+# NOTA: auntentika.com (frontend) lo sirve Cloudflare Pages desde GitHub.
 #       Este túnel es solo para la API en el puerto 8080.
 
 tunnel: autentika-api
 credentials-file: C:\Users\TU_USUARIO\.cloudflared\TUNNEL_ID.json
 
 ingress:
-  - hostname: api.autentika.com
+  - hostname: api.auntentika.com
     service: http://localhost:8080
   - service: http_status:404
