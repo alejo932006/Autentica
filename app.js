@@ -26,21 +26,18 @@ let cart = JSON.parse(localStorage.getItem('tshop_cart')) || [];
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Listeners UI Globales
     document.getElementById('cart-btn').onclick = () => toggleCart();
     document.getElementById('menu-btn').onclick = () => {
         const menu = document.getElementById('mobile-menu');
         menu.classList.toggle('hidden');
         menu.classList.toggle('flex');
     };
-    
-    // Listeners Checkout
+
     document.getElementById('back-to-cart-btn').onclick = showCartList;
     document.getElementById('checkout-form').onsubmit = submitOrder;
 
     updateCartUI();
-    
-    // CONEXIÓN AUTOMÁTICA AL INICIAR
+    fetchConfig();
     fetchTunnelData();
 });
 
@@ -52,7 +49,10 @@ async function fetchTunnelData() {
     
     // Actualizar indicador visual (badge verde)
     const badge = document.getElementById('connection-badge');
-    if(badge) badge.innerHTML = `<i data-lucide="loader" class="animate-spin w-3 h-3"></i> Conectando...`;
+    if (badge) {
+        badge.className = 'connection-badge connection-badge--connecting';
+        badge.innerHTML = `<i data-lucide="loader" class="w-3 h-3 animate-spin"></i> Conectando...`;
+    }
 
     try {
         // Usamos la URL fija de tu dominio
@@ -71,18 +71,18 @@ async function fetchTunnelData() {
         // Renderizar carrusel si existe la función
         if(typeof renderCarousel === 'function') renderCarousel(allProducts);
 
-        if(badge) {
-            badge.className = "flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black border border-green-200 uppercase tracking-wide";
-            badge.innerHTML = `<i data-lucide="wifi" class="w-3 h-3"></i> Online`;
+        if (badge) {
+            badge.className = 'connection-badge connection-badge--online';
+            badge.innerHTML = `<i data-lucide="wifi" class="w-3 h-3"></i> En línea`;
         }
         
         showLoader(false);
     } catch (err) {
         console.error(err);
         showLoader(false);
-        if(badge) {
-            badge.className = "flex items-center gap-1 bg-red-50 text-red-700 px-3 py-1 rounded-full text-[10px] font-black border border-red-200 uppercase tracking-wide";
-            badge.innerHTML = `<i data-lucide="wifi-off" class="w-3 h-3"></i> Offline`;
+        if (badge) {
+            badge.className = 'connection-badge connection-badge--offline';
+            badge.innerHTML = `<i data-lucide="wifi-off" class="w-3 h-3"></i> Sin conexión`;
         }
         
         // Mostrar mensaje de error amigable en la grilla
@@ -139,50 +139,53 @@ function renderProducts(products) {
 window.loadMoreProducts = () => {
     const grid = document.getElementById('products-grid');
     const btnContainer = document.getElementById('load-more-container');
-    
+
     const nextBatch = currentListForDisplay.slice(itemsShown, itemsShown + ITEMS_PER_BATCH);
-    
+
     nextBatch.forEach(p => {
         const precio = formatCurrency(p.precio);
-        
-        // CAMBIO 1: Altura de imagen adaptable (h-40 en móvil / h-64 en PC)
-        const imgContent = p.imagen_url 
-            ? `<img src="${p.imagen_url}" class="h-40 md:h-64 w-full object-cover group-hover:scale-105 transition duration-700 ease-in-out" loading="lazy" alt="${p.nombre}">`
-            : `<div class="h-40 md:h-64 w-full flex items-center justify-center bg-gray-50 text-gray-300"><i data-lucide="image" class="w-8 h-8 md:w-10 md:h-10"></i></div>`;
+        const stockLabel = p.cantidad > 0 ? `${p.cantidad} disp.` : 'Agotado';
+        const imgContent = p.imagen_url
+            ? `<img src="${p.imagen_url}" class="h-40 md:h-56 w-full object-cover" loading="lazy" alt="${p.nombre}">`
+            : `<div class="h-40 md:h-56 w-full flex items-center justify-center bg-gray-50 text-gray-300"><i data-lucide="image" class="w-8 h-8"></i></div>`;
 
-        const card = document.createElement('div');
-        card.className = "bg-white group cursor-pointer fade-in relative"; 
-        
-        card.onclick = (e) => { if(!e.target.closest('.add-btn-direct')) openModal(p); };
+        const card = document.createElement('article');
+        card.className = 'product-card fade-in relative';
+        card.onclick = (e) => { if (!e.target.closest('.product-card__btn-cart')) openModal(p); };
 
         card.innerHTML = `
-            <div class="relative overflow-hidden rounded-xl md:rounded-2xl bg-gray-100 mb-3 shadow-sm border border-gray-100">
+            <div class="product-card__media h-40 md:h-56">
                 ${imgContent}
-                
-                ${p.cantidad < 5 ? `<span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-red-800 text-[9px] md:text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Últimos</span>` : ''}
-                
-                <button onclick="addToCartById('${p.id}'); event.stopPropagation();" 
-                    class="add-btn-direct absolute bottom-2 right-2 w-8 h-8 md:bottom-3 md:right-3 md:w-10 md:h-10 bg-white hover:bg-brand-olive hover:text-white rounded-full shadow-lg flex items-center justify-center transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 md:translate-y-2 md:group-hover:translate-y-0">
-                    <i data-lucide="plus" class="w-4 h-4 md:w-5 md:h-5"></i>
-                </button>
+                ${p.cantidad < 5 && p.cantidad > 0 ? '<span class="product-card__badge">Últimos</span>' : ''}
+                ${p.destacado ? '<span class="product-card__badge product-card__badge--featured">Destacado</span>' : ''}
             </div>
-
-            <div class="text-left px-1 md:text-center md:px-2">
-                <p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 truncate">${p.linea || 'Cuidado General'}</p>
-                <h4 class="font-serif text-sm md:text-lg text-gray-900 leading-tight mb-1 md:mb-2 group-hover:text-brand-olive transition-colors line-clamp-2 min-h-[2.5em]">${p.nombre}</h4>
-                <p class="font-light text-brand-dark text-sm md:text-lg">${precio}</p>
+            <div class="product-card__body">
+                <div class="product-card__meta">
+                    <span class="product-card__category">${p.linea || 'Cuidado General'}</span>
+                    <span class="product-card__stock"><span class="product-card__stock-dot"></span>${stockLabel}</span>
+                </div>
+                <h4 class="product-card__title" title="${p.nombre}">${p.nombre}</h4>
+                <div class="product-card__pricing">
+                    <span class="product-card__price">${precio}</span>
+                </div>
+                <div class="product-card__actions">
+                    <button type="button" onclick="addToCartById('${p.id}'); event.stopPropagation();"
+                        class="product-card__btn-cart" aria-label="Agregar al carrito">
+                        <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                        Agregar al carrito
+                    </button>
+                </div>
             </div>
         `;
         grid.appendChild(card);
     });
 
     itemsShown += nextBatch.length;
-    
+
     const showingEl = document.getElementById('showing-count');
     const totalEl = document.getElementById('total-count');
-    
-    if(showingEl) showingEl.innerText = itemsShown;
-    if(totalEl) totalEl.innerText = currentListForDisplay.length;
+    if (showingEl) showingEl.innerText = itemsShown;
+    if (totalEl) totalEl.innerText = currentListForDisplay.length;
 
     if (itemsShown >= currentListForDisplay.length) {
         btnContainer.classList.add('hidden');
@@ -439,63 +442,46 @@ window.openModal = (p) => {
 window.closeModal = () => document.getElementById('product-modal').classList.add('hidden');
 
 function generateFilters() {
-    // 1. Obtener categorías únicas
     const lineas = ['Todas', ...new Set(allProducts.map(p => p.linea || 'General'))];
-    
-    // A. RENDERIZAR SIDEBAR (Desktop - Lista vertical estilo ML)
-    const sidebarContainer = document.getElementById('sidebar-filters');
+
+    const sidebarContainer = document.getElementById('sidebar-categories');
     if (sidebarContainer) {
-        sidebarContainer.innerHTML = lineas.map(cat => {
-            // Contar cuántos productos hay por categoría
-            const count = cat === 'Todas' ? allProducts.length : allProducts.filter(p => (p.linea || 'General') === cat).length;
-            
-            return `
+        sidebarContainer.innerHTML = `
             <li>
-                <button onclick="filterBy('${cat}')" class="filter-link w-full text-left flex justify-between items-center group text-gray-600 hover:text-brand-olive transition-colors">
-                    <span class="font-medium group-hover:translate-x-1 transition-transform">${cat}</span>
-                    <span class="text-xs text-gray-400 font-light">(${count})</span>
+                <button type="button" onclick="filterBy('Todas')" class="catalog-cat-btn catalog-cat-btn--all">
+                    <span>Ver toda la colección</span>
+                    <span class="catalog-cat-btn__count">${allProducts.length}</span>
                 </button>
             </li>
-            `;
-        }).join('');
+            ${lineas.filter(c => c !== 'Todas').map(cat => {
+                const count = allProducts.filter(p => (p.linea || 'General') === cat).length;
+                return `
+                <li>
+                    <button type="button" onclick="filterBy('${cat}')" class="catalog-cat-btn" data-category="${cat}">
+                        <span>${cat}</span>
+                        <span class="catalog-cat-btn__count">${count}</span>
+                    </button>
+                </li>`;
+            }).join('')}
+        `;
     }
 
-    // B. RENDERIZAR MÓVIL (Botones horizontales)
-    const mobileContainer = document.getElementById('mobile-filters');
+    const mobileContainer = document.getElementById('category-filters');
     if (mobileContainer) {
         mobileContainer.innerHTML = lineas.map(cat => `
-            <button onclick="filterBy('${cat}')" class="filter-btn-mobile whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold border border-gray-200 bg-white text-gray-600">
+            <button type="button" onclick="filterBy('${cat}')" class="filter-pill${cat === 'Todas' ? ' filter-pill--active' : ''}" data-category="${cat}">
                 ${cat}
             </button>
         `).join('');
     }
 }
 
-// Actualizamos la función de filtrado para manejar los estilos activos en ambas listas
 window.filterBy = (catName) => {
-    // 1. Filtrar lógica
     if (catName === 'Todas') renderProducts(allProducts);
     else renderProducts(allProducts.filter(p => (p.linea || 'General') === catName));
 
-    // 2. Estilos Visuales (Desktop)
-    document.querySelectorAll('.filter-link').forEach(btn => {
-        const span = btn.querySelector('span');
-        if (span.innerText === catName) {
-            btn.classList.add('text-brand-olive', 'font-bold');
-            btn.classList.remove('text-gray-600');
-        } else {
-            btn.classList.remove('text-brand-olive', 'font-bold');
-            btn.classList.add('text-gray-600');
-        }
-    });
-
-    // 3. Estilos Visuales (Móvil)
-    document.querySelectorAll('.filter-btn-mobile').forEach(btn => {
-        if (btn.innerText.trim() === catName) {
-            btn.className = "filter-btn-mobile whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold border border-brand-olive bg-brand-olive text-white shadow-md";
-        } else {
-            btn.className = "filter-btn-mobile whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold border border-gray-200 bg-white text-gray-600";
-        }
+    document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.classList.toggle('filter-pill--active', btn.dataset.category === catName);
     });
 };
 
@@ -559,82 +545,86 @@ let featuredProducts = [];
 
 // --- CARRUSEL ESTILO EDITORIAL (Aura Beauty) ---
 function renderCarousel(products) {
-    // 1. Filtrar solo los marcados como destacados en la BD
     featuredProducts = products.filter(p => p.destacado);
-    
+
     const section = document.getElementById('featured-section');
     const track = document.getElementById('carousel-track');
     const dotsContainer = document.getElementById('carousel-dots');
 
-    // Seguridad: Si no hay elementos en el HTML o no hay productos destacados, ocultamos
-    if (!section || !track || featuredProducts.length === 0) {
-        if(section) section.classList.add('hidden');
+    if (window.carouselInterval) {
+        clearInterval(window.carouselInterval);
+        window.carouselInterval = null;
+    }
+
+    if (!section || !track || !dotsContainer || featuredProducts.length === 0) {
+        if (section) section.classList.add('hidden');
         return;
     }
 
     section.classList.remove('hidden');
     track.innerHTML = '';
     dotsContainer.innerHTML = '';
+    currentSlide = 0;
 
     featuredProducts.forEach((p, index) => {
-        // Formatear precio
         const precio = formatCurrency(p.precio);
+        const imgSrc = p.imagen_url || '';
+        const safeName = (p.nombre || '').replace(/"/g, '&quot;');
 
-        // Slide HTML - Diseño dividido (Imagen Izq / Texto Der)
-        const slide = document.createElement('div');
-        slide.className = "w-full flex-shrink-0 flex flex-col md:flex-row min-h-[400px] relative";
-        
-        // Lógica de imagen segura (por si no carga)
-        const imgSrc = p.imagen_url || 'https://via.placeholder.com/800x600/E6E2D3/556B2F?text=Aura+Product';
-
+        const slide = document.createElement('article');
+        slide.className = 'featured-showcase__slide';
         slide.innerHTML = `
-            <div class="md:w-1/2 relative h-64 md:h-auto overflow-hidden group">
-                <img src="${imgSrc}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="${p.nombre}">
-                <div class="absolute top-6 left-6 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-brand-olive shadow-sm">
-                    Recomendado
-                </div>
-            </div>
-            
-            <div class="md:w-1/2 p-10 md:p-16 flex flex-col justify-center items-start space-y-4 bg-brand-cream relative">
-                <div class="absolute top-0 right-0 p-10 opacity-10 pointer-events-none">
-                    <i data-lucide="sparkles" class="w-32 h-32 text-brand-olive"></i>
-                </div>
-
-                <h2 class="text-3xl md:text-5xl font-serif text-brand-dark leading-tight">
-                    ${p.nombre}
-                </h2>
-                
-                <p class="text-xl text-brand-olive font-medium font-serif italic">${precio}</p>
-                
-                <p class="text-gray-500 text-sm leading-relaxed line-clamp-2 max-w-md">
-                   ${p.descripcion || 'Descubre la fórmula natural que transforma tu rutina diaria con ingredientes seleccionados.'}
-                </p>
-
-                <div class="pt-4">
-                    <button onclick="addToCartById('${p.id}')" class="bg-brand-dark text-white hover:bg-brand-olive transition-colors px-8 py-3 rounded-lg font-bold uppercase text-xs tracking-widest flex items-center gap-2 shadow-lg">
-                        <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-                        Lo quiero
+            <div class="featured-showcase__copy">
+                <span class="featured-showcase__eyebrow">Destacado · ${p.linea || 'General'}</span>
+                <h2 class="featured-showcase__name">${safeName}</h2>
+                <p class="featured-showcase__price">${precio}</p>
+                <div class="featured-showcase__actions">
+                    <button type="button" class="featured-showcase__btn featured-showcase__btn--primary"
+                        onclick="addToCartById('${p.id}'); event.stopPropagation();">
+                        Agregar al carrito
+                    </button>
+                    <button type="button" class="featured-showcase__btn featured-showcase__btn--ghost"
+                        onclick="openModalById('${p.id}'); event.stopPropagation();">
+                        Ver detalle →
                     </button>
                 </div>
+            </div>
+            <div class="featured-showcase__visual">
+                ${imgSrc
+                    ? `<div class="featured-showcase__stage">
+                        <img src="${imgSrc}" alt="${safeName}" class="featured-showcase__img" loading="lazy">
+                       </div>`
+                    : `<div class="featured-showcase__img-placeholder"><i data-lucide="sparkles"></i></div>`}
             </div>
         `;
         track.appendChild(slide);
 
-        // Dot (Indicador) HTML
         const dot = document.createElement('button');
-        // Estilo del punto: Si está activo es verde oliva alargado, si no, gris redondo
-        dot.className = `h-2 rounded-full transition-all duration-300 ${index === 0 ? 'w-8 bg-brand-olive' : 'w-2 bg-gray-300 hover:bg-brand-olive/50'}`;
+        dot.type = 'button';
+        dot.className = `featured-showcase__dot${index === 0 ? ' is-active' : ''}`;
+        dot.setAttribute('aria-label', `Ir al slide ${index + 1}`);
         dot.onclick = () => goToSlide(index);
         dotsContainer.appendChild(dot);
     });
-    
-    // Recargar iconos (flechas y bolsa)
+
+    updateCarousel();
     lucide.createIcons();
 
-    // Reiniciar autoplay si existía
-    if(window.carouselInterval) clearInterval(window.carouselInterval);
-    window.carouselInterval = setInterval(() => moveCarousel(1), 6000); // 6 segundos
+    const showNav = featuredProducts.length > 1;
+    document.querySelectorAll('.featured-showcase__nav').forEach(btn => {
+        btn.style.display = showNav ? '' : 'none';
+    });
+    dotsContainer.style.display = showNav ? '' : 'none';
+
+    if (showNav) {
+        window.carouselInterval = setInterval(() => moveCarousel(1), 6000);
+    }
 }
+
+window.openModalById = (id) => {
+    const product = allProducts.find(p => String(p.id) === String(id));
+    if (product) openModal(product);
+};
 
 window.moveCarousel = (direction) => {
     const total = featuredProducts.length;
@@ -651,11 +641,13 @@ window.goToSlide = (index) => {
 
 function updateCarousel() {
     const track = document.getElementById('carousel-track');
-    const dots = document.getElementById('carousel-dots').children;
+    const dots = document.getElementById('carousel-dots');
+    if (!track || !dots) return;
+
     track.style.transform = `translateX(-${currentSlide * 100}%)`;
-    
-    Array.from(dots).forEach((dot, idx) => {
-        dot.className = `h-2 rounded-full transition-all duration-300 ${idx === currentSlide ? 'w-8 bg-brand-olive' : 'w-2 bg-gray-300'}`;
+
+    Array.from(dots.children).forEach((dot, idx) => {
+        dot.classList.toggle('is-active', idx === currentSlide);
     });
 }
 
@@ -739,28 +731,25 @@ async function fetchConfig() {
     try {
         const res = await fetch(`${API_BASE_URL}/api/config`);
         const data = await res.json();
-        
-        // 1. Video (Ya existía)
-        if(data.youtubeId) globalYoutubeId = data.youtubeId;
 
-        // 2. Identidad Básica (Nombre y Logo)
-        if(data.businessName) {
+        if (data.youtubeId) globalYoutubeId = data.youtubeId;
+
+        if (data.businessName) {
             document.querySelectorAll('#brand-name, #brand-name-modal').forEach(el => el.innerText = data.businessName);
-            document.title = data.businessName; // Cambia título de la pestaña
+            document.title = `${data.businessName} — Beauty & Care`;
         }
+
         const brandLogo = data.logoUrl || `${API_BASE_URL}/uploads/logo.jpg`;
         document.querySelectorAll('#brand-logo, #brand-logo-modal, #brand-logo-footer').forEach(el => {
-            el.src = brandLogo;
+            el.src = brandLogo.startsWith('http') ? brandLogo : `${API_BASE_URL}${brandLogo}`;
         });
 
-        // 3. Historia
-        if(data.historyText) {
+        if (data.historyText) {
             document.getElementById('brand-history').innerText = data.historyText;
         }
 
-        // 4. Galería de Fotos (Showcase)
         const showcaseGrid = document.getElementById('brand-showcase');
-        if(showcaseGrid && data.showcaseImages && data.showcaseImages.length > 0) {
+        if (showcaseGrid && data.showcaseImages && data.showcaseImages.length > 0) {
             showcaseGrid.innerHTML = data.showcaseImages.map(img => `
                 <div class="h-32 rounded-lg overflow-hidden shadow-sm border border-brand-sand group">
                     <img src="${img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
@@ -768,9 +757,28 @@ async function fetchConfig() {
             `).join('');
         }
 
-    } catch(e) { console.log("Usando configuración por defecto"); }
+        const resolveVideoUrl = (url) => {
+            if (!url) return null;
+            return url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+        };
+
+        const heroVideoUrl = resolveVideoUrl(data.heroVideoUrl);
+        const featuredVideoUrl = resolveVideoUrl(data.featuredVideoUrl) || heroVideoUrl;
+        const heroSource = document.getElementById('hero-video-source');
+        const featuredSource = document.getElementById('featured-video-source');
+        if (heroVideoUrl && heroSource) {
+            heroSource.src = heroVideoUrl;
+            document.getElementById('hero-video')?.load();
+        }
+        if (featuredVideoUrl && featuredSource) {
+            featuredSource.src = featuredVideoUrl;
+            document.getElementById('featured-video')?.load();
+        }
+
+    } catch (e) {
+        console.log('Usando configuración por defecto');
+    }
 }
-// Agrega fetchConfig() dentro del evento DOMContentLoaded al inicio de tu archivo
 
 // 2. Abrir Modal
 window.openVideoModal = () => {
@@ -799,13 +807,5 @@ window.closeVideoModal = () => {
     document.getElementById('video-container').innerHTML = ''; // Limpiar iframe para detener sonido
     document.body.style.overflow = 'auto';
 };
-
-// IMPORTANTE: Asegúrate de llamar fetchConfig() cuando la página carga.
-document.addEventListener('DOMContentLoaded', () => {
-   fetchConfig();
-   // ... resto de tu código init ...
-});
-
-
 
 lucide.createIcons();

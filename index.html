@@ -9,7 +9,9 @@
     
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
 
@@ -48,335 +50,249 @@
             }
         }
     </script>
-    <style>
-        body { background-color: #F9F7F2; color: #2C3325; }
-        .font-serif { font-family: 'Playfair Display', serif; }
-        
-        /* Gradiente sutil para textos destacados */
-        .text-gradient-nature {
-            background: linear-gradient(to right, #2C3325, #556B2F);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* Botones elegantes */
-        .btn-primary {
-            background-color: #556B2F;
-            color: white;
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            background-color: #3E4F22;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -10px rgba(85, 107, 47, 0.5);
-        }
-    </style>
 </head>
 <body class="antialiased selection:bg-brand-olive selection:text-white">
 
-<header class="sticky top-0 z-40 bg-brand-cream/90 backdrop-blur-md border-b border-brand-sand transition-all duration-300" id="main-header">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="#" class="flex items-center gap-3 group">
-            <div class="w-12 h-12 overflow-hidden rounded-full border border-brand-sand shadow-sm group-hover:shadow-md transition-all duration-500">
-                <img id="brand-logo" src="logo.jpg" alt="Logo" class="w-full h-full object-cover">
-            </div>
-            <div class="flex flex-col">
-                <span id="brand-name" class="text-2xl font-serif font-bold leading-none tracking-tight text-brand-dark">
-                    Autentika
-                </span>
-                <span class="text-[10px] font-bold tracking-[0.2em] text-brand-olive uppercase opacity-80">By Manuela Marmolejo</span>
-            </div>
+<header class="site-header" id="main-header">
+    <div class="site-header__inner">
+        <a href="#" class="site-header__logo">
+            <img id="brand-logo" src="logo.jpg" alt="Autentika">
+            <span class="site-header__wordmark">
+                <strong id="brand-name">Autentika</strong>
+                <small>By Manuela Marmolejo</small>
+            </span>
         </a>
 
-        <nav class="hidden md:flex gap-10 font-medium text-sm tracking-wide text-gray-600">
-            <a href="#" class="hover:text-brand-olive transition-colors relative group py-2">
-                Inicio
-                <span class="absolute bottom-0 left-0 w-0 h-px bg-brand-olive transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <a href="#catalogo" class="hover:text-brand-olive transition-colors relative group py-2">
-                Colección
-                <span class="absolute bottom-0 left-0 w-0 h-px bg-brand-olive transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <a href="#" onclick="toggleContactModal()" class="hover:text-brand-olive transition-colors relative group py-2">
-                Nuestra Historia
-                <span class="absolute bottom-0 left-0 w-0 h-px bg-brand-olive transition-all duration-300 group-hover:w-full"></span>
-            </a>
+        <nav class="site-header__nav" aria-label="Principal">
+            <a href="#">Inicio</a>
+            <a href="#catalogo">Colección</a>
+            <a href="#" onclick="toggleContactModal(); return false;">Nuestra Historia</a>
         </nav>
 
-        <div class="flex items-center gap-6">
-            <div class="relative cursor-pointer group" id="cart-btn">
-                <div class="p-2 rounded-full hover:bg-brand-sand/50 transition-colors">
-                    <i data-lucide="shopping-bag" class="w-5 h-5 text-brand-dark group-hover:text-brand-olive transition-colors"></i>
-                </div>
-                <span id="cart-counter" class="hidden absolute top-0 right-0 bg-brand-olive text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">0</span>
-            </div>
-            <button class="md:hidden text-brand-dark" id="menu-btn">
-                <i data-lucide="menu" class="w-6 h-6"></i>
+        <div class="site-header__actions">
+            <button type="button" class="site-header__icon-btn site-header__icon-btn--cart" id="cart-btn" aria-label="Carrito">
+                <i data-lucide="shopping-bag" class="w-[18px] h-[18px]"></i>
+                <span id="cart-counter" class="hidden">0</span>
+            </button>
+            <button type="button" class="site-header__icon-btn md:hidden" id="menu-btn" aria-label="Menú">
+                <i data-lucide="menu" class="w-5 h-5"></i>
             </button>
         </div>
     </div>
-    
-    <div id="mobile-menu" class="hidden md:hidden bg-brand-cream border-t border-brand-sand p-4 flex-col gap-2 shadow-lg absolute w-full left-0 top-full">
-        <a href="#" class="block py-3 px-4 rounded-lg hover:bg-brand-sand/30 text-brand-dark font-medium">Inicio</a>
-        <a href="#catalogo" class="block py-3 px-4 rounded-lg hover:bg-brand-sand/30 text-brand-dark font-medium">Ver Colección</a>
-        <button onclick="toggleContactModal()" class="block w-full text-left py-3 px-4 rounded-lg hover:bg-brand-sand/30 text-brand-dark font-medium">
-            Contacto
-        </button>
+
+    <div id="mobile-menu" class="hidden md:hidden">
+        <a href="#">Inicio</a>
+        <a href="#catalogo">Ver Colección</a>
+        <button type="button" onclick="toggleContactModal()">Nuestra Historia</button>
     </div>
 </header>
 
-<section class="relative min-h-[90vh] flex items-center overflow-hidden bg-[#F9F7F2]">
-    
-    <div class="absolute top-1/2 left-0 -translate-y-1/2 w-full overflow-hidden pointer-events-none select-none z-0">
-        <span class="text-[20vw] font-serif font-bold text-brand-dark opacity-[0.03] leading-none whitespace-nowrap ml-[-5vw]">
-            Natural Beauty
-        </span>
-    </div>
+<div class="trust-strip">
+    Envíos a todo Colombia
+    <span class="trust-strip__sep">·</span>
+    Productos 100% naturales
+    <span class="trust-strip__sep">·</span>
+    Pago seguro · Contraentrega / Nequi
+</div>
 
-    <div class="container mx-auto px-6 relative z-10">
-        <div class="flex flex-col md:flex-row items-center justify-between">
-            
-            <div class="w-full md:w-3/5 space-y-6 animate-fade-in relative z-30 md:-mr-32 pt-10 md:pt-0">
-                
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-olive/20 bg-white/90 backdrop-blur-sm text-brand-olive text-xs font-bold uppercase tracking-widest shadow-sm w-fit">
-                    <span class="w-2 h-2 rounded-full bg-brand-olive animate-pulse"></span>
-                    Nueva Colección 2025
+<section class="hero-apple">
+    <video autoplay loop muted playsinline class="hero-apple__video" id="hero-video" poster="hero.jpg">
+        <source id="hero-video-source" src="https://videos.pexels.com/video-files/6195792/6195792-uhd_2560_1440_24fps.mp4" type="video/mp4">
+    </video>
+    <div class="hero-apple__overlay" aria-hidden="true"></div>
+
+    <div class="hero-apple__content">
+        <span class="hero-apple__eyebrow">Belleza consciente · Caicedonia</span>
+        <h1 class="hero-apple__title">
+            Natural<br>
+            <span class="hero-apple__title-accent">Glow Ritual.</span>
+        </h1>
+        <p class="hero-apple__subtitle">
+            Redescubre tu brillo con ingredientes 100% orgánicos. Lujo consciente diseñado para nutrir tu cabello y piel desde la raíz.
+        </p>
+        <div class="hero-apple__actions">
+            <a href="#catalogo" class="hero-apple__cta-primary">Ver colección</a>
+            <button type="button" onclick="openVideoModal()" class="hero-apple__cta-secondary">
+                Ver nuestro video →
+            </button>
+        </div>
+    </div>
+</section>
+
+<section class="catalog-section" id="catalogo">
+    <div class="catalog-wrap">
+
+        <section id="featured-section" class="featured-showcase hidden">
+            <p class="featured-showcase__label">Ofertas del mes</p>
+            <div class="featured-showcase__frame">
+                <video autoplay loop muted playsinline class="featured-showcase__video" id="featured-video">
+                    <source id="featured-video-source" src="https://videos.pexels.com/video-files/6195792/6195792-uhd_2560_1440_24fps.mp4" type="video/mp4">
+                </video>
+                <div class="featured-showcase__overlay" aria-hidden="true"></div>
+
+                <div class="featured-showcase__viewport">
+                    <div id="carousel-track" class="featured-showcase__track"></div>
                 </div>
-                
-                <h1 class="text-6xl md:text-9xl font-serif font-medium leading-[0.85] text-brand-dark tracking-tighter">
-                    Natural <br/>
-                    <span class="italic text-brand-olive relative inline-block">
-                        Glow
-                        <svg class="absolute w-full h-3 -bottom-1 left-0 text-brand-olive/40" viewBox="0 0 100 10" preserveAspectRatio="none">
-                            <path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="2" fill="none" />
-                        </svg>
-                    </span> Ritual.
-                </h1>
-                
-                <p class="text-gray-600 text-lg md:text-xl max-w-md leading-relaxed font-light backdrop-blur-sm">
-                    Redescubre tu brillo con ingredientes 100% orgánicos. Lujo consciente diseñado para nutrir tu cabello y piel desde la raíz.
+
+                <button type="button" onclick="moveCarousel(-1)" class="featured-showcase__nav featured-showcase__nav--prev" aria-label="Anterior">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </button>
+                <button type="button" onclick="moveCarousel(1)" class="featured-showcase__nav featured-showcase__nav--next" aria-label="Siguiente">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
+
+                <div id="carousel-dots" class="featured-showcase__dots"></div>
+            </div>
+        </section>
+
+        <div class="catalog-toolbar">
+            <div>
+                <span class="catalog-eyebrow">Colección en vivo</span>
+                <h2 class="catalog-title">
+                    Nuestros <span class="text-gradient-nature">Productos</span>
+                </h2>
+                <p class="catalog-subtitle">
+                    Explora productos naturales para cabello y piel. Filtra por categoría, ordena por precio o busca por nombre.
                 </p>
-                
-                <div class="flex flex-col sm:flex-row gap-4 pt-8">
-                    <a href="#catalogo" class="btn-primary py-4 px-10 rounded-full shadow-2xl flex items-center justify-center gap-3 text-sm font-bold tracking-widest uppercase hover:scale-105 transition-transform bg-brand-olive text-white z-40">
-                        Ver Productos
-                    </a>
-                    <button onclick="openVideoModal()" class="px-8 py-4 rounded-full border-2 border-brand-dark/10 hover:border-brand-dark hover:bg-brand-dark hover:text-white transition-all font-bold text-brand-dark text-sm tracking-widest uppercase flex items-center gap-2 bg-white/50 backdrop-blur z-40">
-                        <i data-lucide="play-circle" class="w-5 h-5"></i> Video
-                    </button>
-                </div>
-
-                <div class="mt-12 pt-8 border-t border-brand-dark/5 grid grid-cols-3 gap-6 max-w-lg animate-fade-in" style="animation-delay: 0.3s;">
-    
-                    <div class="group cursor-default">
-                        <div class="bg-brand-olive/10 w-10 h-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-brand-olive group-hover:text-white transition-colors duration-300">
-                            <i data-lucide="truck" class="w-5 h-5 text-brand-olive group-hover:text-white transition-colors"></i>
-                        </div>
-                        <h4 class="font-serif font-bold text-brand-dark text-sm leading-tight mb-1">Envíos Rápidos</h4>
-                        <p class="text-[11px] text-gray-500 uppercase tracking-wide font-medium">A todo Colombia</p>
-                    </div>
-                
-                    <div class="group cursor-default">
-                        <div class="bg-brand-olive/10 w-10 h-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-brand-olive group-hover:text-white transition-colors duration-300">
-                            <i data-lucide="shield-check" class="w-5 h-5 text-brand-olive group-hover:text-white transition-colors"></i>
-                        </div>
-                        <h4 class="font-serif font-bold text-brand-dark text-sm leading-tight mb-1">Pago Seguro</h4>
-                        <p class="text-[11px] text-gray-500 uppercase tracking-wide font-medium">Contraentrega / Nequi</p>
-                    </div>
-                
-                    <div class="group cursor-default">
-                        <div class="bg-brand-olive/10 w-10 h-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-brand-olive group-hover:text-white transition-colors duration-300">
-                            <i data-lucide="sparkles" class="w-5 h-5 text-brand-olive group-hover:text-white transition-colors"></i>
-                        </div>
-                        <h4 class="font-serif font-bold text-brand-dark text-sm leading-tight mb-1">100% Original</h4>
-                        <p class="text-[11px] text-gray-500 uppercase tracking-wide font-medium">Garantía Directa</p>
-                    </div>
-                
-                </div>
-
-            </div>
-
-            <div class="w-full md:w-2/5 relative mt-16 md:mt-0 flex justify-end perspective-1000 z-10">
-                
-                <div class="relative w-full max-w-[420px] aspect-[3/4] rounded-t-[200px] bg-white p-2 shadow-2xl transform rotate-[-2deg] hover:rotate-0 transition-transform duration-700">
-                    <div class="w-full h-full rounded-t-[190px] overflow-hidden relative">
-                        <img src="hero.jpg" alt="Aura Model" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-brand-olive/20 to-transparent mix-blend-multiply"></div>
-                    </div>
-                </div>
-
-                <div class="absolute top-1/2 -translate-y-1/2 -left-12 md:-left-20 w-40 h-40 md:w-56 md:h-56 rounded-full border-[6px] border-[#F9F7F2] shadow-[0_20px_40px_rgba(0,0,0,0.2)] overflow-hidden animate-float z-20 bg-white">
-                    <img src="hero.jpg" alt="Detalle" class="w-full h-full object-cover scale-[1.7] hover:scale-[1.8] transition-transform duration-1000">
-                </div>
-
-                <div class="absolute -top-6 -right-6 md:top-10 md:-right-12 bg-white p-5 rounded-full shadow-xl animate-bounce z-30 flex flex-col items-center justify-center w-24 h-24 border border-gray-100" style="animation-duration: 6s;">
-                    <span class="text-[10px] uppercase font-bold text-gray-400">Desde</span>
-                    <span class="text-xl font-serif font-bold text-brand-dark">$45k</span>
-                </div>
-
-            </div>
-        </div>
-    </div>
-</section>
-
-<section id="featured-section" class="hidden relative py-12 bg-white">
-    <div class="container mx-auto px-6">
-        <div class="flex items-center gap-4 mb-8">
-            <h3 class="text-2xl font-serif text-brand-dark italic">Ofertas Del Mes</h3>
-            <div class="h-px flex-1 bg-brand-sand"></div>
-        </div>
-
-        <div class="relative rounded-3xl overflow-hidden shadow-xl bg-brand-cream border border-brand-sand">
-            
-            <div id="carousel-track" class="flex transition-transform duration-700 ease-in-out h-full">
-                </div>
-
-            <button onclick="moveCarousel(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-brand-dark p-3 rounded-full shadow-sm backdrop-blur-sm transition-all z-10 hover:scale-110">
-                <i data-lucide="arrow-left" class="w-5 h-5"></i>
-            </button>
-            <button onclick="moveCarousel(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-brand-dark p-3 rounded-full shadow-sm backdrop-blur-sm transition-all z-10 hover:scale-110">
-                <i data-lucide="arrow-right" class="w-5 h-5"></i>
-            </button>
-
-            <div id="carousel-dots" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10"></div>
-        </div>
-    </div>
-</section>
-
-<section class="py-24 bg-white relative overflow-hidden" id="catalogo">
-    
-    <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 opacity-[0.03] pointer-events-none select-none">
-       <i data-lucide="flower" class="w-96 h-96 text-brand-dark"></i>
-    </div>
-
-    <div class="container mx-auto px-6 relative z-10">
-    
-        <div class="mb-8 border-b border-gray-200 pb-4">
-            <h2 class="text-3xl font-serif text-brand-dark">Colección</h2>
-            <p class="text-sm text-gray-500 mt-1">Explora nuestros productos naturales</p>
-        </div>
-    
-        <div class="flex flex-col lg:flex-row gap-10 items-start">
-            
-            <div class="w-full lg:flex-1 order-2 lg:order-1">
-                
-                <div class="lg:hidden mb-6">
-                    <input type="text" oninput="searchProductsFront(this.value)" placeholder="Buscar producto..." class="w-full p-3 border border-gray-300 rounded-lg font-sans">
-                    <div id="mobile-filters" class="flex gap-2 overflow-x-auto mt-3 pb-2 scrollbar-hide">
-                        </div>
-                </div>
-    
-                <div class="hidden lg:flex justify-between items-center mb-6">
-                    <span class="text-sm text-gray-500">Mostrando resultados</span>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-bold text-brand-dark">Ordenar por:</span>
-                        <select onchange="sortProducts(this.value)" class="text-sm border-none bg-transparent font-medium text-gray-600 focus:ring-0 cursor-pointer hover:text-brand-olive outline-none">
-                            <option value="relevancia">Relevancia</option>
-                            <option value="menor_precio">Menor precio</option>
-                            <option value="mayor_precio">Mayor precio</option>
-                        </select>
-                    </div>
-                </div>
-    
-                <div id="loader" class="flex flex-col justify-center items-center py-20 hidden">
-                    <div class="animate-spin text-brand-olive mb-4"><i data-lucide="loader-2" class="w-10 h-10"></i></div>
-                    <p class="text-gray-400 text-xs font-bold tracking-widest uppercase">Cargando...</p>
-                </div>
-    
-                <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 fade-in min-h-[400px]"></div>
-    
-                <div id="empty-state" class="hidden text-center py-24 bg-gray-50 rounded-xl mt-8">
-                    <div class="inline-block p-4 rounded-full bg-white shadow-sm mb-4">
-                        <i data-lucide="search-x" class="w-6 h-6 text-brand-olive"></i>
-                    </div>
-                    <p class="text-gray-500">No encontramos productos con esa búsqueda.</p>
-                </div>
-    
-                <div id="load-more-container" class="hidden text-center mt-12">
-                    <button onclick="loadMoreProducts()" class="text-brand-olive font-bold text-sm uppercase tracking-widest border-b border-brand-olive pb-1 hover:text-brand-dark hover:border-brand-dark transition-all">
-                        Ver más productos
-                    </button>
+                <div class="catalog-status">
+                    <span id="connection-badge" class="connection-badge connection-badge--connecting">
+                        <i data-lucide="loader" class="w-3 h-3 animate-spin"></i> Conectando...
+                    </span>
                 </div>
             </div>
-    
-            <aside class="w-full lg:w-64 flex-shrink-0 order-1 lg:order-2 hidden lg:block sticky top-24">
-                
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6">
-                    <h3 class="font-bold text-brand-dark text-sm mb-3 uppercase tracking-wider">Búsqueda</h3>
-                    <div class="relative">
-                        <input type="text" oninput="searchProductsFront(this.value)" placeholder="Buscar..." class="w-full pl-3 pr-8 py-2 text-sm border-b border-gray-300 focus:border-brand-olive outline-none bg-transparent font-sans">
-                        <i data-lucide="search" class="absolute right-0 top-2 w-4 h-4 text-gray-400"></i>
+            <div>
+                <label class="catalog-search">
+                    <i data-lucide="search" class="catalog-search__icon"></i>
+                    <input type="text" id="search-input" oninput="searchProductsFront(this.value)" placeholder="Buscar producto..." autocomplete="off">
+                </label>
+            </div>
+        </div>
+
+        <div id="loader" class="catalog-loader hidden">
+            <div class="catalog-loader__spinner"></div>
+            <p>Cargando colección...</p>
+        </div>
+
+        <div id="error-message" class="hidden catalog-error">
+            <h4>Error de conexión</h4>
+            <p id="error-text">No se pudo conectar con el servidor.</p>
+        </div>
+
+        <div class="catalog-sort-mobile lg:hidden">
+            <button type="button" onclick="sortProducts('menor_precio')" class="catalog-sort-btn">Menor precio</button>
+            <button type="button" onclick="sortProducts('mayor_precio')" class="catalog-sort-btn">Mayor precio</button>
+            <button type="button" onclick="sortProducts('relevancia')" class="catalog-sort-btn">Relevancia</button>
+        </div>
+
+        <div id="category-filters" class="category-filters lg:hidden"></div>
+
+        <div class="catalog-layout">
+            <aside class="catalog-sidebar hidden lg:block custom-scrollbar">
+                <div class="catalog-sidebar__section">
+                    <h3 class="catalog-sidebar__heading">
+                        <i data-lucide="sliders-horizontal" class="w-4 h-4" style="color: var(--brand-olive)"></i>
+                        Ordenar
+                    </h3>
+                    <div class="catalog-sort-list">
+                        <button type="button" onclick="sortProducts('menor_precio')" class="catalog-sort-btn">
+                            <i data-lucide="arrow-up-narrow-wide" class="w-4 h-4 opacity-60"></i>
+                            Menor precio
+                        </button>
+                        <button type="button" onclick="sortProducts('mayor_precio')" class="catalog-sort-btn">
+                            <i data-lucide="arrow-down-wide-narrow" class="w-4 h-4 opacity-60"></i>
+                            Mayor precio
+                        </button>
+                        <button type="button" onclick="sortProducts('relevancia')" class="catalog-sort-btn">
+                            <i data-lucide="list" class="w-4 h-4 opacity-60"></i>
+                            Relevancia
+                        </button>
                     </div>
                 </div>
-    
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                    <h3 class="font-bold text-brand-dark text-sm mb-4 uppercase tracking-wider">Categorías</h3>
-                    <ul id="sidebar-filters" class="space-y-3 text-sm">
-                        </ul>
+
+                <div class="catalog-sidebar__section">
+                    <h3 class="catalog-sidebar__heading">
+                        <i data-lucide="layers" class="w-4 h-4" style="color: var(--brand-olive)"></i>
+                        Categorías
+                    </h3>
+                    <ul id="sidebar-categories" class="catalog-categories"></ul>
                 </div>
-    
-                <div class="mt-6 p-4 bg-brand-cream rounded-lg border border-brand-olive/20 text-center">
-                    <div class="bg-brand-olive/10 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <i data-lucide="shield-check" class="w-5 h-5 text-brand-olive"></i>
+
+                <div class="catalog-sidebar__section">
+                    <div class="catalog-promo-card">
+                        <div class="catalog-promo-card__icon">
+                            <i data-lucide="shield-check" class="w-5 h-5"></i>
+                        </div>
+                        <h4>Compra protegida</h4>
+                        <p>Garantía directa en todos tus productos naturales.</p>
                     </div>
-                    <p class="text-xs text-brand-dark font-bold">Compra Protegida</p>
-                    <p class="text-[10px] text-gray-500 mt-1">Garantía directa en todos tus productos.</p>
                 </div>
-    
             </aside>
-    
+
+            <div class="catalog-main">
+                <div id="products-grid" class="products-grid fade-in"></div>
+
+                <div id="load-more-container" class="catalog-load-more hidden">
+                    <button type="button" onclick="loadMoreProducts()" class="catalog-load-more__btn">
+                        <span>Ver más productos</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                    <p class="catalog-load-more__meta">
+                        Mostrando <span id="showing-count">0</span> de <span id="total-count">0</span>
+                    </p>
+                </div>
+
+                <div id="empty-state" class="catalog-empty hidden">
+                    <div class="catalog-empty__icon">
+                        <i data-lucide="search-x" class="w-8 h-8"></i>
+                    </div>
+                    <h4>Sin resultados</h4>
+                    <p>No encontramos productos con esa búsqueda.</p>
+                    <button type="button" onclick="filterBy('Todas')" class="catalog-empty__btn">Ver toda la colección</button>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-<footer class="bg-[#2C3325] text-[#F9F7F2] py-8 border-t border-[#556B2F]/30 relative overflow-hidden text-sm">
-    
-    <div class="container mx-auto px-6 relative z-10">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-            
-            <div class="flex flex-col gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full border border-[#556B2F] overflow-hidden">
-                        <img id="brand-logo-footer" src="logo.jpg" alt="Logo" class="w-full h-full object-cover opacity-80">                    </div>
-                    <span class="text-xl font-serif font-bold tracking-tight">Autentika</span>
-                </div>
-                
-                <div class="flex gap-3 mt-1">
-                    <a href="#" class="hover:text-[#556B2F] transition-colors"><i data-lucide="instagram" class="w-4 h-4"></i></a>
-                    <a href="#" class="hover:text-[#556B2F] transition-colors"><i data-lucide="facebook" class="w-4 h-4"></i></a>
-                    <a href="https://wa.me/573165294505" target="_blank" class="hover:text-[#556B2F] transition-colors"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
-                </div>
-            </div>
+<a href="https://wa.me/573165294505" target="_blank" rel="noopener" class="wa-fab" aria-label="WhatsApp">
+    <i data-lucide="message-circle" class="w-6 h-6"></i>
+</a>
 
-            <div class="space-y-2">
-                <h4 class="font-bold text-[#556B2F] uppercase text-xs tracking-widest mb-1">Ubicación</h4>
-                <div class="flex gap-2 items-start text-gray-300">
-                    <i data-lucide="map-pin" class="w-4 h-4 text-[#556B2F] flex-shrink-0 mt-0.5"></i>
-                    <div>
-                        <p class="font-medium text-white">Caicedonia, Valle del Cauca</p>
-                        <p>Supermercado Surtitodo Ideal, Local 1</p>
-                    </div>
+<footer class="site-footer">
+    <div class="site-footer__inner">
+        <div class="site-footer__grid">
+            <div>
+                <a href="#" class="site-footer__logo">
+                    <img id="brand-logo-footer" src="logo.jpg" alt="Autentika">
+                    <span>Autentika</span>
+                </a>
+                <p class="site-footer__tagline">Belleza consciente con ingredientes naturales. Cuidado capilar y corporal desde el corazón del Valle del Cauca.</p>
+                <div class="site-footer__social">
+                    <a href="#" aria-label="Instagram"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+                    <a href="#" aria-label="Facebook"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                    <a href="https://wa.me/573165294505" target="_blank" rel="noopener" aria-label="WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
                 </div>
             </div>
 
-            <div class="space-y-2">
-                <h4 class="font-bold text-[#556B2F] uppercase text-xs tracking-widest mb-1">Atención</h4>
-                <p class="flex items-center gap-2 text-gray-300">
-                    <i data-lucide="phone" class="w-3 h-3 text-[#556B2F]"></i> +57 316 529 4505
-                </p>
-                <p class="flex items-center gap-2 text-gray-300">
-                    <i data-lucide="clock" class="w-3 h-3 text-[#556B2F]"></i> Lun-Sab: 9am - 7pm
-                </p>
+            <div class="site-footer__col">
+                <h4>Ubicación</h4>
+                <ul class="site-footer__contact">
+                    <li><i data-lucide="map-pin" class="w-4 h-4"></i> Caicedonia, Valle del Cauca<br>Supermercado Surtitodo Ideal, Local 1</li>
+                </ul>
             </div>
 
+            <div class="site-footer__col">
+                <h4>Atención</h4>
+                <ul class="site-footer__contact">
+                    <li><i data-lucide="phone" class="w-4 h-4"></i> +57 316 529 4505</li>
+                    <li><i data-lucide="clock" class="w-4 h-4"></i> Lun–Sáb: 9am – 7pm</li>
+                </ul>
+            </div>
         </div>
 
-        <div class="border-t border-[#556B2F]/20 mt-8 pt-4 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-500">
+        <div class="site-footer__bottom">
             <p>&copy; 2025 Autentika Beauty.</p>
-            <div class="flex gap-2 mt-2 md:mt-0">
-                <span>Nequi</span> &bull; <span>Efectivo</span> &bull; <span>Bancolombia</span>
-            </div>
+            <p>Nequi · Efectivo · Bancolombia</p>
         </div>
     </div>
 </footer>
