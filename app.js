@@ -37,8 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('checkout-form').onsubmit = submitOrder;
 
     updateCartUI();
+    applyHeroVideos();
     fetchConfig();
     fetchTunnelData();
+
+    ['hero-video', 'featured-video'].forEach((id) => {
+        document.getElementById(id)?.play().catch(() => {});
+    });
 });
 
 // --- API & DATA ---
@@ -757,27 +762,51 @@ async function fetchConfig() {
             `).join('');
         }
 
-        const resolveVideoUrl = (url) => {
-            if (!url) return null;
-            return url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
-        };
-
-        const heroVideoUrl = resolveVideoUrl(data.heroVideoUrl);
-        const featuredVideoUrl = resolveVideoUrl(data.featuredVideoUrl) || heroVideoUrl;
-        const heroSource = document.getElementById('hero-video-source');
-        const featuredSource = document.getElementById('featured-video-source');
-        if (heroVideoUrl && heroSource) {
-            heroSource.src = heroVideoUrl;
-            document.getElementById('hero-video')?.load();
-        }
-        if (featuredVideoUrl && featuredSource) {
-            featuredSource.src = featuredVideoUrl;
-            document.getElementById('featured-video')?.load();
-        }
+        applyHeroVideos(data.heroVideoUrl, data.featuredVideoUrl);
 
     } catch (e) {
         console.log('Usando configuración por defecto');
+        applyHeroVideos();
     }
+}
+
+const DEFAULT_HERO_VIDEO = `${API_BASE_URL}/uploads/herovideo.mp4`;
+
+function applyHeroVideos(heroUrl, featuredUrl) {
+    const heroVideo = document.getElementById('hero-video');
+    const featuredVideo = document.getElementById('featured-video');
+    const heroSource = document.getElementById('hero-video-source');
+    const featuredSource = document.getElementById('featured-video-source');
+
+    const resolveVideoUrl = (url) => {
+        if (!url) return DEFAULT_HERO_VIDEO;
+        return url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+    };
+
+    const setupVideo = (videoEl, sourceEl, url) => {
+        if (!videoEl || !sourceEl) return;
+
+        const targetUrl = resolveVideoUrl(url);
+        if (sourceEl.src === targetUrl) return;
+
+        sourceEl.src = targetUrl;
+        videoEl.load();
+
+        videoEl.onerror = () => {
+            if (sourceEl.src !== DEFAULT_HERO_VIDEO) {
+                sourceEl.src = DEFAULT_HERO_VIDEO;
+                videoEl.load();
+            }
+        };
+
+        videoEl.onloadeddata = () => {
+            videoEl.play().catch(() => {});
+        };
+    };
+
+    const resolvedHero = resolveVideoUrl(heroUrl);
+    setupVideo(heroVideo, heroSource, resolvedHero);
+    setupVideo(featuredVideo, featuredSource, featuredUrl || heroUrl || resolvedHero);
 }
 
 // 2. Abrir Modal

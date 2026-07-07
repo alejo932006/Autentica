@@ -81,6 +81,8 @@ function getPublicConfig() {
         logoUrl: DEFAULT_LOGO,
         showcaseImages: [],
         youtubeId: '',
+        heroVideoUrl: '/uploads/herovideo.mp4',
+        featuredVideoUrl: '/uploads/herovideo.mp4',
     };
 
     let config = { ...defaults };
@@ -88,10 +90,15 @@ function getPublicConfig() {
         config = { ...defaults, ...JSON.parse(fs.readFileSync(CONFIG_FILE)) };
     }
 
+    const heroVideoPath = config.heroVideoUrl || '/uploads/herovideo.mp4';
+    const featuredVideoPath = config.featuredVideoUrl || heroVideoPath;
+
     return {
         ...config,
         logoUrl: resolveAssetUrl(config.logoUrl),
         showcaseImages: (config.showcaseImages || []).map(resolveAssetUrl),
+        heroVideoUrl: resolveAssetUrl(heroVideoPath),
+        featuredVideoUrl: resolveAssetUrl(featuredVideoPath),
     };
 }
 
