@@ -106,7 +106,7 @@
                 <div class="page-header-row">
                     <div>
                         <span class="page-eyebrow">Inventario</span>
-                        <h1>Catálogo & Stock</h1>
+                        <h1>Catálogo &amp; Fotos</h1>
                     </div>
                 </div>
                 <div class="search-box">
@@ -114,7 +114,77 @@
                     <input type="search" placeholder="Buscar producto..." oninput="searchProducts(this.value)">
                 </div>
             </header>
-            <div id="inventory-list" class="grid-container">
+
+            <div class="photo-cleanup-shell">
+                <div class="photo-cleanup-panel" id="photo-cleanup-body">
+                    <div class="photo-cleanup-head">
+                        <div class="photo-cleanup-head-text">
+                            <span class="material-icons-round">cleaning_services</span>
+                            <div>
+                                <strong>Limpieza del servidor de fotos</strong>
+                                <p>Analiza y elimina archivos huérfanos, duplicados o de productos sin stock.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="photo-cleanup-intro">
+                        Protege automáticamente <code>logo.jpg</code>, el video del hero y las imágenes de configuración de la tienda.
+                    </p>
+                    <button type="button" class="btn-bulk-photo btn-bulk-photo--wide" id="btn-scan-uploads" onclick="scanUploadsCleanup()">
+                        <span class="material-icons-round">search</span>
+                        Analizar servidor
+                    </button>
+
+                    <div id="uploads-scan-results" class="uploads-scan-results hidden">
+                        <div class="uploads-scan-kpis">
+                            <div class="uploads-kpi">
+                                <span class="uploads-kpi-val" id="scan-disk-files">0</span>
+                                <span class="uploads-kpi-lbl">En servidor</span>
+                            </div>
+                            <div class="uploads-kpi uploads-kpi--warn">
+                                <span class="uploads-kpi-val" id="scan-orphans">0</span>
+                                <span class="uploads-kpi-lbl">Huérfanos</span>
+                            </div>
+                            <div class="uploads-kpi uploads-kpi--warn">
+                                <span class="uploads-kpi-val" id="scan-not-web">0</span>
+                                <span class="uploads-kpi-lbl">Sin stock</span>
+                            </div>
+                            <div class="uploads-kpi">
+                                <span class="uploads-kpi-val" id="scan-dup-content">0</span>
+                                <span class="uploads-kpi-lbl">Dup. contenido</span>
+                            </div>
+                            <div class="uploads-kpi">
+                                <span class="uploads-kpi-val" id="scan-dup-refs">0</span>
+                                <span class="uploads-kpi-lbl">Refs repetidas</span>
+                            </div>
+                        </div>
+                        <p id="uploads-scan-detail" class="uploads-scan-detail"></p>
+                    </div>
+
+                    <div class="bulk-photo-tools__actions photo-cleanup-actions">
+                        <button type="button" class="btn-bulk-photo" onclick="runUploadsCleanup('orphans')" title="Archivos en /uploads que ningún producto usa">
+                            <span class="material-icons-round">folder_delete</span>
+                            Huérfanos
+                        </button>
+                        <button type="button" class="btn-bulk-photo" onclick="runUploadsCleanup('not-in-web')" title="Productos sin stock">
+                            <span class="material-icons-round">hide_image</span>
+                            Sin stock
+                        </button>
+                        <button type="button" class="btn-bulk-photo" onclick="runUploadsCleanup('dedupe-refs')" title="Misma foto repetida en un producto">
+                            <span class="material-icons-round">content_copy</span>
+                            Refs duplicadas
+                        </button>
+                        <button type="button" class="btn-bulk-photo" onclick="runUploadsCleanup('duplicate-files')" title="Archivos idénticos (mismo contenido)">
+                            <span class="material-icons-round">filter_none</span>
+                            Dup. contenido
+                        </button>
+                    </div>
+                    <p class="bulk-photo-tools__hint">
+                        Ejecuta <strong>Analizar servidor</strong> antes de limpiar. «Sin stock» quita la foto de productos con cantidad 0.
+                    </p>
+                </div>
+            </div>
+
+            <div id="inventory-list" class="grid-container" style="margin-top:20px">
                 <p class="panel-empty">Cargando...</p>
             </div>
         </section>

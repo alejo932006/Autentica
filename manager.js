@@ -766,6 +766,125 @@ function playNotificationSound() {
     // audio.play().catch(e => console.log("Audio bloqueado por navegador"));
 }
 
+// ==========================================
+// LIMPIEZA DE FOTOS EN SERVIDOR
+// ==========================================
+
+let lastUploadsScan = null;
+
+function formatBytes(bytes) {
+    const n = Number(bytes) || 0;
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+    if (n < 1024 * 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(n / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+async function scanUploadsCleanup() {
+    const btn = document.getElementById('btn-scan-uploads');
+    const results = document.getElementById('uploads-scan-results');
+    if (!btn || !results) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-icons-round">hourglass_top</span> Analizando…';
+
+    try {
+        const res = await authFetch(`${API_URL}/manager/uploads/cleanup/scan`);
+        if (!res || !res.ok) {
+            alert('No se pudo analizar el servidor. Reinicia el backend si acabas de actualizar.');
+            return;
+        }
+
+        lastUploadsScan = await res.json();
+        const s = lastUploadsScan.summary;
+
+        document.getElementById('scan-disk-files').textContent = lastUploadsScan.disk.totalFiles;
+        document.getElementById('scan-orphans').textContent = s.orphanCount;
+        document.getElementById('scan-not-web').textContent = s.notInWebProductCount;
+        document.getElementById('scan-dup-content').textContent = s.duplicateContentGroups;
+        document.getElementById('scan-dup-refs').textContent = s.duplicateRefProductCount;
+
+        const detail = document.getElementById('uploads-scan-detail');
+        const parts = [
+            `Espacio en servidor: ${formatBytes(lastUploadsScan.disk.totalBytes)}.`,
+            s.orphanCount > 0 ? `${s.orphanCount} huérfano(s) (${formatBytes(s.orphanBytes)} recuperables).` : 'Sin archivos huérfanos.',
+            s.notInWebProductCount > 0 ? `${s.notInWebProductCount} producto(s) sin stock con ${s.notInWebFileCount} foto(s).` : null,
+            s.duplicateContentGroups > 0 ? `${s.duplicateContentExtraFiles} archivo(s) duplicados por contenido idéntico.` : null,
+            s.duplicateRefProductCount > 0 ? `${s.duplicateRefProductCount} producto(s) con la misma foto repetida.` : null,
+            `${s.configProtectedCount} archivo(s) protegidos por configuración de tienda.`,
+        ].filter(Boolean);
+        detail.textContent = parts.join(' ');
+
+        results.classList.remove('hidden');
+    } catch (e) {
+        console.error(e);
+        alert('Error de conexión al analizar.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-icons-round">search</span> Analizar servidor';
+    }
+}
+
+async function runUploadsCleanup(action) {
+    const labels = {
+        orphans: {
+            title: 'eliminar archivos huérfanos del servidor',
+            desc: 'Archivos en /uploads que ningún producto ni la configuración de tienda referencia.',
+        },
+        'not-in-web': {
+            title: 'eliminar fotos de productos sin stock',
+            desc: 'Productos con cantidad 0 quedarán sin foto en la base de datos.',
+        },
+        'dedupe-refs': {
+            title: 'corregir referencias duplicadas',
+            desc: 'Si un producto tiene la misma imagen repetida, se deja una sola referencia.',
+        },
+        'duplicate-files': {
+            title: 'unificar archivos duplicados (mismo contenido)',
+            desc: 'Detecta fotos idénticas y conserva una copia, actualizando las referencias.',
+        },
+        inactive: {
+            title: 'eliminar fotos de productos sin stock',
+            desc: 'Igual que «Sin stock»: productos con cantidad 0.',
+        },
+    };
+
+    const cfg = labels[action];
+    if (!cfg) return;
+    if (!confirm(`¿Confirmas ${cfg.title}?\n\n${cfg.desc}`)) return;
+
+    const btns = document.querySelectorAll('.btn-bulk-photo');
+    btns.forEach(b => { b.disabled = true; });
+
+    try {
+        const res = await authFetch(`${API_URL}/manager/uploads/cleanup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action }),
+        });
+
+        if (!res) return;
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            alert(
+                `${data.message}\n` +
+                `Archivos borrados: ${data.filesDeleted ?? 0}` +
+                (data.productsUpdated != null ? `\nProductos actualizados: ${data.productsUpdated}` : '') +
+                (data.failedFiles?.length ? `\n(${data.failedFiles.length} archivo(s) no se pudieron borrar)` : '')
+            );
+            loadInventory();
+            if (lastUploadsScan) scanUploadsCleanup();
+        } else {
+            alert(data.message || 'No se pudo completar la limpieza.');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Error de conexión.');
+    } finally {
+        btns.forEach(b => { b.disabled = false; });
+    }
+}
 
 // INICIAR EL VIGILANTE
 startLiveUpdates();

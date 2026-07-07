@@ -11,6 +11,7 @@ const port = process.env.PORT || 8080;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const JWT_SECRET = process.env.JWT_SECRET;
+const uploadsCleanup = require('./lib/uploads-cleanup');
 
 // Middleware para proteger rutas
 const verifyToken = (req, res, next) => {
@@ -251,6 +252,39 @@ app.patch('/api/manager/feature/:id', verifyToken, async (req, res) => {
         await pool.query('UPDATE productos SET es_destacado = $1 WHERE codigo = $2', [status, id]);
         res.json({ success: true });
     } catch (err) { res.status(500).send(err.message); }
+});
+
+// --- Limpieza de fotos en /uploads ---
+app.get('/api/manager/uploads/cleanup/scan', verifyToken, async (req, res) => {
+    try {
+        const report = await uploadsCleanup.scanUploads(pool);
+        res.json(report);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/manager/uploads/cleanup', verifyToken, async (req, res) => {
+    const { action } = req.body;
+    const allowed = ['orphans', 'not-in-web', 'inactive', 'dedupe-refs', 'duplicate-files'];
+    if (!allowed.includes(action)) {
+        return res.status(400).json({ success: false, message: 'Acción no válida' });
+    }
+
+    try {
+        const result = await uploadsCleanup.runCleanup(pool, action);
+        res.json({
+            success: true,
+            productsUpdated: result.productsUpdated,
+            filesDeleted: result.filesDeleted,
+            failedFiles: result.failedFiles,
+            message: result.message,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
 // 6. Eliminar Pedido (NUEVO)
