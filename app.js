@@ -158,17 +158,20 @@ window.loadMoreProducts = () => {
         card.className = 'product-card fade-in relative';
         card.onclick = (e) => { if (!e.target.closest('.product-card__btn-cart')) openModal(p); };
 
+        const stockClass = p.cantidad > 0 ? 'product-card__stock' : 'product-card__stock product-card__stock--out';
+        const stockDotClass = p.cantidad > 0 ? 'product-card__stock-dot' : 'product-card__stock-dot product-card__stock-dot--out';
+
         card.innerHTML = `
             <div class="product-card__media h-40 md:h-56">
                 ${imgContent}
                 ${p.cantidad < 5 && p.cantidad > 0 ? '<span class="product-card__badge">Últimos</span>' : ''}
                 ${p.destacado ? '<span class="product-card__badge product-card__badge--featured">Destacado</span>' : ''}
+                <span class="${stockClass}" title="Disponibilidad">
+                    <span class="${stockDotClass}"></span>${stockLabel}
+                </span>
             </div>
             <div class="product-card__body">
-                <div class="product-card__meta">
-                    <span class="product-card__category">${p.linea || 'Cuidado General'}</span>
-                    <span class="product-card__stock"><span class="product-card__stock-dot"></span>${stockLabel}</span>
-                </div>
+                <span class="product-card__category">${p.linea || 'Cuidado General'}</span>
                 <h4 class="product-card__title" title="${p.nombre}">${p.nombre}</h4>
                 <div class="product-card__pricing">
                     <span class="product-card__price">${precio}</span>
@@ -177,7 +180,7 @@ window.loadMoreProducts = () => {
                     <button type="button" onclick="addToCartById('${p.id}'); event.stopPropagation();"
                         class="product-card__btn-cart" aria-label="Agregar al carrito">
                         <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-                        Agregar al carrito
+                        <span class="product-card__btn-label">Agregar al carrito</span>
                     </button>
                 </div>
             </div>
