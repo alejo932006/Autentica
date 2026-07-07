@@ -7,18 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#F9F7F2] h-screen flex items-center justify-center">
+<body class="bg-[#fafafa] h-screen flex items-center justify-center">
 
-    <div class="bg-white p-10 rounded-2xl shadow-2xl border border-[#E6E2D3] w-full max-w-sm">
+    <div class="bg-white p-10 rounded-2xl shadow-2xl border border-gray-200 w-full max-w-sm">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-serif text-[#2C3325] font-bold">Autentika</h1>
+            <h1 class="text-3xl font-serif text-[#556B2F] font-bold">Autentika</h1>
             <p class="text-[#556B2F] text-xs tracking-[0.2em] uppercase mt-2 font-bold">Panel de Control</p>
         </div>
 
         <form id="login-form" class="space-y-5">
             <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Usuario</label>
-                <input type="text" id="usuario" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-[#556B2F] text-[#2C3325]" required>
+                <input type="text" id="usuario" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-[#556B2F] text-[#1d1d1f]" required>
             </div>
             <div>
                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Contraseña</label>
@@ -27,7 +27,7 @@
             
             <p id="error-msg" class="text-red-500 text-xs font-bold text-center hidden"></p>
 
-            <button type="submit" class="w-full bg-[#2C3325] hover:bg-[#556B2F] text-white py-3 rounded-lg font-bold transition-colors uppercase tracking-widest text-xs">
+            <button type="submit" class="w-full bg-[#1d1d1f] hover:bg-black text-white py-3 rounded-lg font-bold transition-colors uppercase tracking-widest text-xs">
                 Ingresar
             </button>
         </form>

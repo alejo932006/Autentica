@@ -743,7 +743,7 @@ async function fetchConfig() {
         const showcaseGrid = document.getElementById('brand-showcase');
         if (showcaseGrid && data.showcaseImages && data.showcaseImages.length > 0) {
             showcaseGrid.innerHTML = data.showcaseImages.map(img => `
-                <div class="h-32 rounded-lg overflow-hidden shadow-sm border border-brand-sand group">
+                <div class="h-32 rounded-lg overflow-hidden shadow-sm border border-gray-200 group">
                     <img src="${img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                 </div>
             `).join('');
