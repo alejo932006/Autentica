@@ -1,12 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { loadStoreConfig } = require('./store-config');
 
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
-const CONFIG_FILE = path.join(__dirname, '..', 'store_config.json');
 const IMAGE_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
 const DISK_EXT = new Set([...IMAGE_EXT, '.mp4']);
-const PROTECTED_FILES = new Set(['logo.jpg']);
+const PROTECTED_FILES = new Set(['logo.jpg', 'herovideo.mp4']);
+
+function normalizeFilename(name) {
+    return String(name || '').trim().toLowerCase();
+}
 
 function extractUploadFilenames(imagenUrl) {
     if (!imagenUrl) return [];
@@ -23,34 +27,38 @@ function extractUploadFilenames(imagenUrl) {
 
 function getConfigReferencedFilenames() {
     const filenames = new Set(PROTECTED_FILES);
-    if (!fs.existsSync(CONFIG_FILE)) return filenames;
+    const config = loadStoreConfig();
+    const urls = [
+        config.logoUrl,
+        config.heroVideoUrl,
+        config.featuredVideoUrl,
+        ...(config.showcaseImages || []),
+    ].filter(Boolean);
 
-    try {
-        const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        const urls = [
-            config.logoUrl,
-            config.heroVideoUrl,
-            config.featuredVideoUrl,
-            ...(config.showcaseImages || []),
-        ].filter(Boolean);
-
-        for (const url of urls) {
-            extractUploadFilenames(url).forEach(f => filenames.add(f));
-        }
-    } catch {
-        /* ignore invalid config */
+    for (const url of urls) {
+        extractUploadFilenames(url).forEach(f => filenames.add(f));
     }
 
     return filenames;
+}
+
+function isProtectedUpload(filename) {
+    if (!filename) return true;
+    const normalized = normalizeFilename(filename);
+    for (const protectedName of PROTECTED_FILES) {
+        if (normalizeFilename(protectedName) === normalized) return true;
+    }
+    for (const protectedName of getConfigReferencedFilenames()) {
+        if (normalizeFilename(protectedName) === normalized) return true;
+    }
+    return false;
 }
 
 function deleteUploadFiles(imagenUrl) {
     const deleted = [];
     const failed = [];
     for (const filename of extractUploadFilenames(imagenUrl)) {
-        if (PROTECTED_FILES.has(filename) || getConfigReferencedFilenames().has(filename)) {
-            continue;
-        }
+        if (isProtectedUpload(filename)) continue;
         const filePath = path.join(UPLOADS_DIR, filename);
         try {
             if (fs.existsSync(filePath)) {
@@ -146,7 +154,7 @@ async function scanUploads(pool) {
     const configProtected = getConfigReferencedFilenames();
 
     const referenced = new Set([...byFilename.keys(), ...configProtected]);
-    const orphans = diskFiles.filter(f => !referenced.has(f.filename));
+    const orphans = diskFiles.filter(f => !isProtectedUpload(f.filename) && !referenced.has(f.filename));
 
     const notInWeb = products.filter(p => !isProductVisibleOnWeb(p));
     const dupRefs = products.filter(p => p.hasDupRefs);
@@ -225,6 +233,7 @@ async function runCleanup(pool, action) {
     if (action === 'orphans') {
         const scan = await scanUploads(pool);
         for (const orphan of scan.disk.orphans) {
+            if (isProtectedUpload(orphan.filename)) continue;
             try {
                 fs.unlinkSync(path.join(UPLOADS_DIR, orphan.filename));
                 result.filesDeleted++;
@@ -252,14 +261,13 @@ async function runCleanup(pool, action) {
     if (action === 'duplicate-files') {
         const scan = await scanUploads(pool);
         const replaceMap = new Map();
-        const configProtected = getConfigReferencedFilenames();
 
         for (const group of scan.duplicateContent) {
             const files = group.files;
             const referenced = files.filter(f => f.referencedBy.length > 0);
             const keeper = referenced[0]?.filename || files[0].filename;
             for (const file of files) {
-                if (file.filename !== keeper && !configProtected.has(file.filename)) {
+                if (file.filename !== keeper && !isProtectedUpload(file.filename)) {
                     replaceMap.set(file.filename, keeper);
                 }
             }
@@ -288,6 +296,7 @@ async function runCleanup(pool, action) {
         }
 
         for (const duplicate of replaceMap.keys()) {
+            if (isProtectedUpload(duplicate)) continue;
             const filePath = path.join(UPLOADS_DIR, duplicate);
             try {
                 if (fs.existsSync(filePath)) {

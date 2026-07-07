@@ -12,6 +12,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const JWT_SECRET = process.env.JWT_SECRET;
 const uploadsCleanup = require('./lib/uploads-cleanup');
+const { CONFIG_FILE, loadStoreConfig } = require('./lib/store-config');
 
 // Middleware para proteger rutas
 const verifyToken = (req, res, next) => {
@@ -65,32 +66,14 @@ app.use('/uploads', express.static('uploads'));
 const pool = new Pool(getDbConfig());
 
 // --- SISTEMA DE CONFIGURACIÓN (VIDEO Y EXTRAS) ---
-// --- SISTEMA DE CONFIGURACIÓN (Actualizado) ---
-const CONFIG_FILE = 'store_config.json';
-const DEFAULT_LOGO = '/uploads/logo.jpg';
-
 function resolveAssetUrl(url) {
-    const path = url || DEFAULT_LOGO;
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    return `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+    const assetPath = url || loadStoreConfig().logoUrl;
+    if (assetPath.startsWith('http://') || assetPath.startsWith('https://')) return assetPath;
+    return `${BASE_URL}${assetPath.startsWith('/') ? assetPath : `/${assetPath}`}`;
 }
 
 function getPublicConfig() {
-    const defaults = {
-        businessName: 'Autentika',
-        historyText: 'Escribe aquí tu historia...',
-        logoUrl: DEFAULT_LOGO,
-        showcaseImages: [],
-        youtubeId: '',
-        heroVideoUrl: '/uploads/herovideo.mp4',
-        featuredVideoUrl: '/uploads/herovideo.mp4',
-    };
-
-    let config = { ...defaults };
-    if (fs.existsSync(CONFIG_FILE)) {
-        config = { ...defaults, ...JSON.parse(fs.readFileSync(CONFIG_FILE)) };
-    }
-
+    const config = loadStoreConfig();
     const heroVideoPath = config.heroVideoUrl || '/uploads/herovideo.mp4';
     const featuredVideoPath = config.featuredVideoUrl || heroVideoPath;
 
@@ -110,14 +93,8 @@ app.get('/api/config', (req, res) => {
 
 // 2. Guardar Configuración General
 app.post('/api/manager/config', verifyToken, (req, res) => {
-    // Leemos la config anterior para no borrar datos que no vengan en el request
-    let currentConfig = {};
-    if (fs.existsSync(CONFIG_FILE)) currentConfig = JSON.parse(fs.readFileSync(CONFIG_FILE));
-
-    // Mezclamos la vieja con la nueva
-    const newConfig = { ...currentConfig, ...req.body };
-    
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(newConfig));
+    const newConfig = { ...loadStoreConfig(), ...req.body };
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(newConfig, null, 2));
     res.json({ success: true });
 });
 
