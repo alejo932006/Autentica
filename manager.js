@@ -46,37 +46,57 @@ let allOrders = [];
 let currentEditId = null;
 
 // --- NAVEGACIÓN ---
+const ALL_VIEWS = ['orders', 'inventory', 'featured', 'config', 'users'];
+
 function switchView(viewName, btn) {
-    // 1. Ocultar TODAS las vistas posibles (Aquí faltaba la nueva)
-    document.getElementById('view-orders').style.display = 'none';
-    document.getElementById('view-inventory').style.display = 'none';
-    document.getElementById('view-featured').style.display = 'none';
-    
-    // AGREGAMOS ESTA LÍNEA: Ocultar también la configuración
-    const configView = document.getElementById('view-config');
-    if (configView) configView.style.display = 'none';
-    
-    // 2. Gestionar clases activas del menú (Visual del botón presionado)
+    ALL_VIEWS.forEach(name => {
+        const el = document.getElementById(`view-${name}`);
+        if (el) el.style.display = 'none';
+    });
+
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    if(btn) btn.classList.add('active');
-    
-    // 3. Mostrar la vista deseada
+    document.querySelectorAll('.mob-item[data-view]').forEach(b => b.classList.remove('active'));
+
+    if (btn) {
+        btn.classList.add('active');
+    } else {
+        const mobBtn = document.querySelector(`.mob-item[data-view="${viewName}"]`);
+        const sideBtn = document.querySelector(`.sidebar .nav-item[onclick*="'${viewName}'"]`);
+        if (mobBtn) mobBtn.classList.add('active');
+        if (sideBtn) sideBtn.classList.add('active');
+    }
+
     const viewToShow = document.getElementById(`view-${viewName}`);
     if (viewToShow) viewToShow.style.display = 'block';
 
-    // 4. Cargar datos frescos según la pestaña
-    if(viewName === 'orders') loadOrders();
-    if(viewName === 'inventory') loadInventory();
-    if(viewName === 'featured') loadFeaturedView();
-    if(viewName === 'config') loadStoreConfig(); // <--- Importante: cargar datos de tienda
-    if(viewName === 'users') loadUsers();
+    if (viewName === 'orders') loadOrders();
+    if (viewName === 'inventory') loadInventory();
+    if (viewName === 'featured') loadFeaturedView();
+    if (viewName === 'config') loadStoreConfig();
+    if (viewName === 'users') loadUsers();
+}
+
+window.toggleMobMenu = () => {
+    const menu = document.getElementById('mob-menu-extra');
+    menu.classList.toggle('hidden');
+    document.body.style.overflow = menu.classList.contains('hidden') ? '' : 'hidden';
+};
+
+function formatPaymentMethod(method) {
+    const map = {
+        Contraentrega: 'Efectivo (Contraentrega)',
+        Transferencia: 'Bancolombia / Nequi',
+        Datafono: 'Datáfono a domicilio',
+        MercadoPago: 'Tarjeta / PSE (legacy)',
+    };
+    return map[method] || method || 'Contraentrega';
 }
 // ==========================================
 // PEDIDOS
 // ==========================================
 async function loadOrders() {
     const container = document.getElementById('orders-list');
-    container.innerHTML = '<p style="padding:20px; text-align:center;">Cargando pedidos...</p>';
+    container.innerHTML = '<p class="panel-empty">Cargando pedidos...</p>';
 
     try {
         const res = await authFetch(`${API_URL}/manager/orders`);
@@ -95,7 +115,7 @@ async function loadOrders() {
         renderOrdersList();
     } catch (e) {
         console.error(e);
-        container.innerHTML = '<p style="padding:20px; color:red; text-align:center;">Error conectando a Localhost.</p>';
+        container.innerHTML = '<p class="panel-empty" style="color:var(--danger)">Error conectando al servidor.</p>';
     }
 }
 
@@ -104,37 +124,32 @@ function renderOrdersList(ordersToRender = null) {
     const container = document.getElementById('orders-list');
     container.innerHTML = '';
 
-    // Si no nos pasan una lista específica, usamos TODOS los pedidos
-    const list = ordersToRender || allOrders; 
+    const list = ordersToRender || allOrders;
 
-    if(list.length === 0) {
-        container.innerHTML = '<p style="padding:20px; text-align:center;">No se encontraron pedidos en estas fechas.</p>';
+    if (list.length === 0) {
+        container.innerHTML = '<p class="panel-empty">No se encontraron pedidos.</p>';
         return;
     }
 
-    // Header Tabla (Estilo Claro)
     const header = document.createElement('div');
-    header.style.cssText = "display: grid; grid-template-columns: 0.5fr 1.5fr 1fr 1fr 1fr; padding: 15px; background: #F3F4F6; font-weight: bold; color: #555; font-size: 0.9rem; border-bottom: 1px solid #ddd;";
-    header.innerHTML = `<span>ID</span><span>Cliente</span><span>Fecha</span><span>Estado</span><span style="text-align:right">Total</span>`;
+    header.className = 'orders-table-header';
+    header.innerHTML = '<span>ID</span><span>Cliente</span><span>Fecha</span><span>Estado</span><span>Total</span>';
     container.appendChild(header);
 
     list.forEach(o => {
         const div = document.createElement('div');
-        div.style.cssText = "display: grid; grid-template-columns: 0.5fr 1.5fr 1fr 1fr 1fr; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; align-items: center; transition: background 0.2s;";
-        div.onmouseover = () => div.style.background = '#F9FAFB';
-        div.onmouseout = () => div.style.background = 'white';
+        div.className = 'order-row';
         div.onclick = () => openOrderDetails(o.id);
 
-        const statusStyle = o.estado === 'PENDIENTE' 
-            ? 'background: #FEF3C7; color: #D97706;' 
-            : 'background: #D1FAE5; color: #059669;';
+        const isPending = o.estado === 'PENDIENTE';
+        const statusClass = isPending ? 'status-badge--pending' : 'status-badge--done';
 
         div.innerHTML = `
-            <span style="font-weight:bold; color: #2C3325;">#${o.id}</span>
+            <span class="order-id">#${o.id}</span>
             <span>${o.cliente_nombre}</span>
-            <span style="color: #888; font-size: 0.85rem;">${new Date(o.fecha_pedido).toLocaleDateString()}</span>
-            <span><span style="${statusStyle} padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;">${o.estado}</span></span>
-            <span style="text-align:right; font-weight:bold;">$${Number(o.total_venta).toLocaleString()}</span>
+            <span style="color:var(--text-muted);font-size:0.82rem">${new Date(o.fecha_pedido).toLocaleDateString()}</span>
+            <span><span class="status-badge ${statusClass}">${o.estado}</span></span>
+            <span class="order-total">$${Number(o.total_venta).toLocaleString()}</span>
         `;
         container.appendChild(div);
     });
@@ -155,13 +170,13 @@ function openOrderDetails(id) {
     document.getElementById('detail-location').innerText = `${o.cliente_ciudad} - ${o.cliente_departamento}`;
     document.getElementById('detail-address').innerText = o.cliente_direccion;
     document.getElementById('detail-barrio').innerText = o.cliente_barrio || 'No especificado';
-    document.getElementById('detail-method').innerText = o.metodo_pago || 'Contraentrega';
+    document.getElementById('detail-method').innerText = formatPaymentMethod(o.metodo_pago);
     
     // 4. Llenar Total
     document.getElementById('detail-total').innerText = `$${Number(o.total_venta).toLocaleString('es-CO')}`;
 
     // 5. Configurar Botón WhatsApp con Mensaje Personalizado
-    const mensaje = `Hola ${o.cliente_nombre}, te saludamos de Aura Beauty 🌿. Hemos recibido tu pedido #${o.id} por valor de $${Number(o.total_venta).toLocaleString()}. ¿Podemos confirmar los datos de envío?`;
+    const mensaje = `Hola ${o.cliente_nombre}, te saludamos de Autentika 🌿. Hemos recibido tu pedido #${o.id} por valor de $${Number(o.total_venta).toLocaleString()}. ¿Podemos confirmar los datos de envío?`;
     const telefono = o.cliente_telefono.replace(/\D/g, ''); // Limpiar el número
     document.getElementById('btn-whatsapp').href = `https://wa.me/57${telefono}?text=${encodeURIComponent(mensaje)}`;
 
@@ -170,19 +185,17 @@ function openOrderDetails(id) {
     try {
         const items = JSON.parse(o.detalle_productos);
         prodsContainer.innerHTML = items.map(item => `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="background:#f0f0f0; width:40px; height:40px; border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
-                        ${item.imagen_url ? `<img src="${item.imagen_url}" style="width:100%; height:100%; object-fit:cover;">` : '📦'}
+            <div class="detail-product-row">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:40px;height:40px;border-radius:6px;overflow:hidden;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        ${item.imagen_url ? `<img src="${item.imagen_url}" style="width:100%;height:100%;object-fit:cover">` : '📦'}
                     </div>
                     <div>
-                        <div style="font-weight:bold; color:#333;">${item.nombre}</div>
-                        <div style="font-size:0.8rem; color:#888;">Cant: ${item.qty}</div>
+                        <div style="font-weight:700">${item.nombre}</div>
+                        <div style="font-size:0.78rem;color:var(--text-muted)">Cant: ${item.qty}</div>
                     </div>
                 </div>
-                <div style="font-weight:bold; color:#556B2F;">
-                    $${Number(item.precio * item.qty).toLocaleString()}
-                </div>
+                <div style="font-weight:700;color:var(--accent)">$${Number(item.precio * item.qty).toLocaleString()}</div>
             </div>
         `).join('');
     } catch(e) {
@@ -194,35 +207,29 @@ const actionsDiv = document.getElementById('detail-actions');
     
 // Botón de Eliminar (Siempre visible, pequeño y rojo)
 const btnDelete = `
-    <button onclick="deleteOrder(${o.id})" title="Eliminar Pedido"
-        style="background: #FEE2E2; color: #EF4444; border: 1px solid #FECACA; width: 45px; height: 45px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+    <button type="button" onclick="deleteOrder(${o.id})" title="Eliminar pedido" class="btn-delete-order">
         <span class="material-icons-round">delete</span>
     </button>
 `;
 
-// Botón Principal (Cambia según estado)
 let mainAction = '';
 
-if(o.estado === 'PENDIENTE') {
+if (o.estado === 'PENDIENTE') {
     mainAction = `
-        <button onclick="changeStatus(${o.id}, 'DESPACHADO')" 
-            style="background: #2C3325; color: white; border: none; padding: 0 25px; height: 45px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s;">
+        <button type="button" onclick="changeStatus(${o.id}, 'DESPACHADO')" class="btn-ship">
             <span class="material-icons-round">local_shipping</span>
-            Marcar Enviado
+            Marcar enviado
         </button>
     `;
 } else {
     mainAction = `
-        <div style="display: flex; align-items: center; gap: 5px; color: #10B981; font-weight: bold; background: #ECFDF5; padding: 0 20px; height: 45px; border-radius: 8px;">
+        <div class="status-done-badge">
             <span class="material-icons-round">check_circle</span>
             Completado
         </div>
     `;
 }
 
-// Unimos los botones (El de eliminar a la derecha del principal)
-actionsDiv.style.display = 'flex';
-actionsDiv.style.gap = '10px';
 actionsDiv.innerHTML = mainAction + btnDelete;
 
     // 8. Mostrar Modal
@@ -285,12 +292,7 @@ function renderProducts(list) {
                     </div>
                 </div>
                 
-                <div class="form-group" style="margin-top: 10px;">
-                    <label style="font-size: 0.8rem; color: gray;">Descripción</label>
-                    <textarea id="desc-${p.id}" rows="3" 
-                        style="width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 8px; font-family: sans-serif; font-size: 0.85rem;" 
-                        placeholder="Escribe aquí...">${p.descripcion || ''}</textarea>
-                </div>
+                <textarea id="desc-${p.id}" rows="3" class="input-area" placeholder="Escribe aquí...">${p.descripcion || ''}</textarea>
 
                 <button class="btn-save" onclick="updateProduct('${p.id}')">Guardar</button>
             </div>
@@ -368,8 +370,8 @@ function renderFeaturedUI() {
     
     allProducts.filter(p => p.destacado).forEach(p => {
         const d = document.createElement('div');
-        d.style.cssText = "display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;";
-        d.innerHTML = `<span>${p.nombre}</span> <button onclick="toggleFeature('${p.id}', false)" style="color:red; background:none; border:none; cursor:pointer;">Quitar</button>`;
+        d.className = 'featured-list-item';
+        d.innerHTML = `<span>${p.nombre}</span> <button type="button" onclick="toggleFeature('${p.id}', false)" class="btn-text btn-text--danger">Quitar</button>`;
         activeDiv.appendChild(d);
     });
 }
@@ -379,10 +381,10 @@ function searchForFeature(v) {
     if(v.length < 2) { listDiv.innerHTML = ''; return; }
     
     listDiv.innerHTML = '';
-    allProducts.filter(p => !p.destacado && p.nombre.toLowerCase().includes(v.toLowerCase())).slice(0,5).forEach(p => {
+    allProducts.filter(p => !p.destacado && p.nombre.toLowerCase().includes(v.toLowerCase())).slice(0, 5).forEach(p => {
         const d = document.createElement('div');
-        d.style.cssText = "display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;";
-        d.innerHTML = `<span>${p.nombre}</span> <button onclick="toggleFeature('${p.id}', true)" style="color:green; background:none; border:none; cursor:pointer;">Destacar</button>`;
+        d.className = 'featured-list-item';
+        d.innerHTML = `<span>${p.nombre}</span> <button type="button" onclick="toggleFeature('${p.id}', true)" class="btn-text btn-text--success">Destacar</button>`;
         listDiv.appendChild(d);
     });
 }
@@ -547,7 +549,7 @@ function startLiveUpdates() {
 function showToastNotification(message) {
     // Crea una etiqueta flotante temporal
     const toast = document.createElement('div');
-    toast.style.cssText = "position: fixed; bottom: 20px; right: 20px; background: #2C3325; color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-weight: bold; z-index: 1000; animation: slideIn 0.3s ease-out;";
+    toast.style.cssText = "position:fixed;bottom:calc(20px + var(--mobile-nav-bar-h, 0px));right:20px;background:var(--olive);color:white;padding:14px 22px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.3);font-weight:700;z-index:1100;animation:slideIn 0.3s ease-out;";
     toast.innerText = message;
     document.body.appendChild(toast);
 
@@ -677,16 +679,13 @@ async function loadUsers() {
         container.innerHTML = '';
         users.forEach(u => {
             const div = document.createElement('div');
-            div.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee;";
-            
+            div.className = 'user-row';
             div.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="background:#556B2F; color:white; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
-                        ${u.usuario.charAt(0).toUpperCase()}
-                    </div>
-                    <span style="font-weight:bold; color:#333;">${u.usuario}</span>
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div class="user-avatar">${u.usuario.charAt(0).toUpperCase()}</div>
+                    <span style="font-weight:700">${u.usuario}</span>
                 </div>
-                <button onclick="deleteUser(${u.id})" style="color:#EF4444; background:none; border:none; cursor:pointer;" title="Eliminar">
+                <button type="button" onclick="deleteUser(${u.id})" style="background:none;border:none;color:var(--danger);cursor:pointer" title="Eliminar">
                     <span class="material-icons-round">delete</span>
                 </button>
             `;

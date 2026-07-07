@@ -668,16 +668,14 @@ window.updatePaymentInfo = (method) => {
 
     if (method === 'Contraentrega') {
         infoText.innerHTML = `<strong>Pago seguro:</strong> Pagas en efectivo al recibir el producto.`;
-    } 
+    }
     else if (method === 'Transferencia') {
         infoText.innerHTML = `<strong>Bancolombia / Nequi:</strong> Sin costos adicionales. Te enviaremos los datos por WhatsApp.`;
-    } 
-    else if (method === 'MercadoPago') {
-        alertBox.className = "mt-3 border-l-4 p-3 rounded-r-md flex gap-3 transition-all duration-300 bg-sky-50 border-sky-600";
-        iconHTML = `<i data-lucide="credit-card" class="h-4 w-4 text-sky-600 mt-0.5"></i>`;
-        
-        // AQUÍ AGREGAMOS LA INFORMACIÓN DEL AUMENTO
-        infoText.innerHTML = `<strong>PSE y Tarjetas:</strong> Generaremos un Link de Pago Seguro de Mercado Pago y Te lo Enviaremos Por Whtasapp. <br><span class="text-red-600 font-bold text-[10px] mt-1 block">⚠️ Aplica comisión del 3.29% por uso de plataforma.</span>`;
+    }
+    else if (method === 'Datafono') {
+        alertBox.className = "mt-3 border-l-4 p-3 rounded-r-md flex gap-3 transition-all duration-300 bg-green-50 border-brand-olive";
+        iconHTML = `<i data-lucide="credit-card" class="h-4 w-4 text-brand-olive mt-0.5"></i>`;
+        infoText.innerHTML = `<strong>Datáfono a domicilio:</strong> Llevaremos el datáfono hasta tu hogar para que realices el pago con tarjeta débito o crédito al momento de la entrega.`;
     }
 
     // Actualizar icono
@@ -690,27 +688,13 @@ window.updatePaymentInfo = (method) => {
     // 2. ACTUALIZAR EL TOTAL VISUALMENTE
     const newTotal = getFinalTotal();
     totalDisplay.innerText = formatCurrency(newTotal);
-    
-    // Si hay recargo, podemos poner el texto en rojo o naranja para resaltar
-    if (method === 'MercadoPago') {
-        totalDisplay.classList.add('text-brand-orange');
-        totalDisplay.classList.remove('text-gray-900');
-    } else {
-        totalDisplay.classList.add('text-gray-900');
-        totalDisplay.classList.remove('text-brand-orange');
-    }
+    totalDisplay.classList.add('text-brand-dark');
+    totalDisplay.classList.remove('text-brand-orange');
 };
 
 // Función auxiliar para calcular el total con o sin comisión
 function getFinalTotal() {
-    const rawTotal = cart.reduce((acc, item) => acc + (item.precio * item.qty), 0);
-    const method = document.getElementById('cust-method').value;
-    
-    // Si es MercadoPago, sumamos el 3.29%
-    if (method === 'MercadoPago') {
-        return rawTotal * 1.0329; // Multiplicar por 1.0329 es igual a sumar 3.29%
-    }
-    return rawTotal;
+    return cart.reduce((acc, item) => acc + (item.precio * item.qty), 0);
 }
 
 // Función para abrir/cerrar el modal de contacto
