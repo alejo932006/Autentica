@@ -7,3 +7,7 @@ Backend/.env
 Backend/uploads/*
 !Backend/uploads/logo.jpg
 .wrangler/
+
+.dev.vars*
+!.dev.vars.example
+!.env.example
